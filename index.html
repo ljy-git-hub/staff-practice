@@ -92,6 +92,8 @@
     .segmented { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background: #f2f5f9; border-radius: 11px; padding: 4px; }
     .segmented button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 8px 5px; border-radius: 8px; cursor: pointer; }
     .segmented button.active { background: #fff; color: var(--ink); box-shadow: 0 2px 7px rgba(30,54,92,.1); font-weight: 700; }
+    .length-selector { grid-template-columns: repeat(6, 1fr); }
+    .length-selector button { padding-left: 3px; padding-right: 3px; }
     .range-grid { display: grid; gap: 7px; }
     .range-option { position: relative; }
     .range-option input { position: absolute; opacity: 0; pointer-events: none; }
@@ -141,7 +143,7 @@
     <section class="stats" aria-label="练习统计">
       <div class="stat"><div class="stat-label">当前连对</div><div class="stat-value" id="streak">0</div></div>
       <div class="stat"><div class="stat-label">正确率</div><div class="stat-value" id="accuracy">—</div></div>
-      <div class="stat"><div class="stat-label">已答题</div><div class="stat-value" id="answered">0</div></div>
+      <div class="stat"><div class="stat-label">已答音符</div><div class="stat-value" id="answered">0</div></div>
       <div class="stat"><div class="stat-label">最佳连对</div><div class="stat-value" id="best">0</div></div>
     </section>
 
@@ -150,7 +152,7 @@
         <div class="practice-top">
           <div>
             <h2 class="practice-title">这是什么音？</h2>
-            <p class="practice-hint">先在谱上找位置，再用钢琴键或 1–7 唱名作答。</p>
+            <p class="practice-hint">从左到右识别音符，按顺序用钢琴键或 1–7 唱名作答。</p>
           </div>
           <button class="ghost-btn" id="newQuestion" type="button">换一个 ↻</button>
         </div>
@@ -166,7 +168,7 @@
           <button data-mode="solfege" type="button">1–7 唱名</button>
         </div>
         <div id="piano" class="piano" aria-label="钢琴键盘"></div>
-        <div class="piano-label" id="pianoLabel">点击琴键作答，也可以连接 MIDI 键盘（后续可加）</div>
+        <div class="piano-label" id="pianoLabel">点击琴键作答，当前音答对后会自动进入下一个音</div>
         <div class="keys hidden" id="solfegeKeys" aria-label="唱名选项">
           <button class="key-btn" data-answer="1" type="button"><span class="key-num">1</span><span class="key-name">Do · 哆</span></button>
           <button class="key-btn" data-answer="2" type="button"><span class="key-num">2</span><span class="key-name">Re · 来</span></button>
@@ -187,6 +189,17 @@
             <div class="segmented" id="clefSelector">
               <button class="active" data-clef="treble" type="button">高音谱号</button>
               <button data-clef="bass" type="button">低音谱号</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">一题几个音</span>
+            <div class="segmented length-selector" id="lengthSelector" aria-label="一题几个音">
+              <button class="active" data-length="1" type="button">1</button>
+              <button data-length="2" type="button">2</button>
+              <button data-length="3" type="button">3</button>
+              <button data-length="4" type="button">4</button>
+              <button data-length="5" type="button">5</button>
+              <button data-length="6" type="button">6</button>
             </div>
           </div>
           <div class="field">
@@ -232,7 +245,7 @@
       }
     };
 
-    const state = { clef: 'treble', range: 'basic', mode: 'piano', current: null, streak: 0, best: 0, correct: 0, answered: 0, revealed: false, startedAt: Date.now() };
+    const state = { clef: 'treble', range: 'basic', mode: 'piano', sequenceLength: 1, sequence: [], position: 0, current: null, streak: 0, best: 0, correct: 0, answered: 0, revealed: false, startedAt: Date.now() };
     const svg = document.getElementById('staff');
     const feedback = document.getElementById('feedback');
     const staffCaption = document.getElementById('staffCaption');
@@ -246,45 +259,58 @@
       return notes;
     }
 
-    function drawStaff(note) {
+    function drawStaff(notes) {
       const width = 700, bottom = 174, gap = 20, left = 90, right = 622;
       const lines = Array.from({ length: 5 }, (_, i) => `<line x1="${left}" y1="${bottom - i * gap}" x2="${right}" y2="${bottom - i * gap}" class="staff-line"/>`).join('');
       const stepUnit = gap / 2;
-      const y = bottom - note.step * stepUnit;
       const mid = bottom - 4 * stepUnit;
-      const stemUp = y >= mid;
-      const stemX = stemUp ? 439 : 421;
-      const stemY2 = stemUp ? y - 57 : y + 57;
-      const head = `<ellipse cx="430" cy="${y}" rx="15" ry="10" transform="rotate(-18 430 ${y})" class="note-head"/>`;
-      const stem = `<line x1="${stemX}" y1="${y - (stemUp ? 3 : -3)}" x2="${stemX}" y2="${stemY2}" class="note-stem"/>`;
-      const ledger = [];
-      const ledgerX1 = 398, ledgerX2 = 462;
-      if (note.step < 0) for (let s = -2; s >= note.step; s -= 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
-      if (note.step > 8) for (let s = 10; s <= note.step; s += 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
+      const noteXs = notes.length === 1 ? [430] : notes.map((_, index) => 190 + index * (430 / (notes.length - 1)));
+      const noteMarkup = notes.map((note, index) => {
+        const x = noteXs[index];
+        const y = bottom - note.step * stepUnit;
+        const stemUp = y >= mid;
+        const stemX = stemUp ? x + 13 : x - 13;
+        const stemY2 = stemUp ? y - 57 : y + 57;
+        const ledger = [];
+        const ledgerX1 = x - 30, ledgerX2 = x + 30;
+        if (note.step < 0) for (let s = -2; s >= note.step; s -= 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
+        if (note.step > 8) for (let s = 10; s <= note.step; s += 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
+        const active = index === state.position ? `<circle cx="${x}" cy="${y}" r="26" class="active-note"/>` : '';
+        const head = `<ellipse cx="${x}" cy="${y}" rx="15" ry="10" transform="rotate(-18 ${x} ${y})" class="note-head"/>`;
+        const stem = `<line x1="${stemX}" y1="${y - (stemUp ? 3 : -3)}" x2="${stemX}" y2="${stemY2}" class="note-stem"/>`;
+        return `${ledger.join('')}${active}${head}${stem}`;
+      }).join('');
       const clefSymbol = state.clef === 'treble' ? '𝄞' : '𝄢';
       svg.innerHTML = `<style>
         .staff-line { stroke: #63758a; stroke-width: 1.6; }
         .ledger-line { stroke: #63758a; stroke-width: 1.6; }
+        .active-note { fill: #edf1ff; stroke: #9cadf5; stroke-width: 1.5; }
         .note-head { fill: #273b58; }
         .note-stem { stroke: #273b58; stroke-width: 3; stroke-linecap: round; }
       </style>
       <rect x="0" y="0" width="700" height="260" fill="#fcfdff"/>
-      <g>${lines}${ledger.join('')}</g>
+      <g>${lines}</g>
       <text x="74" y="${state.clef === 'treble' ? 183 : 164}" font-size="92" font-family="Times New Roman, Noto Serif, serif" fill="#273b58">${clefSymbol}</text>
       <line x1="${right + 14}" y1="${bottom - 4 * gap}" x2="${right + 14}" y2="${bottom}" stroke="#c9d4df" stroke-width="1.5"/>
-      <g>${head}${stem}</g>`;
+      <g>${noteMarkup}</g>`;
     }
 
     function chooseQuestion() {
       const pool = getPool();
-      let next = pool[Math.floor(Math.random() * pool.length)];
-      if (state.current && pool.length > 1) while (next[0] === state.current.letter && next[2] === state.current.step) next = pool[Math.floor(Math.random() * pool.length)];
-      state.current = { letter: next[0], octave: next[1], step: next[2], answer: solfege[next[0]], pitch: `${next[0]}${next[1]}` };
+      const count = Math.min(state.sequenceLength, pool.length);
+      const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, count);
+      state.sequence = selected.map(next => ({ letter: next[0], octave: next[1], step: next[2], answer: solfege[next[0]], pitch: `${next[0]}${next[1]}` }));
+      state.position = 0;
+      state.current = state.sequence[0];
       state.revealed = false;
-      drawStaff(state.current);
+      drawStaff(state.sequence);
       renderPiano();
-      staffCaption.textContent = `${clefs[state.clef].name} · 自然音 · ${state.mode === 'piano' ? '请选择对应琴键' : '请选择 1–7'}`;
-      setFeedback('ready', '✦', '准备好了吗？先观察音符落在第几线或第几个间。');
+      staffCaption.textContent = `${clefs[state.clef].name} · ${count} 个不同音 · ${state.mode === 'piano' ? '从左到右点击琴键' : '从左到右选择 1–7'}`;
+      setFeedback('ready', '✦', `准备好了吗？先观察 ${count} 个音符的位置，从左到右识别。`);
+    }
+
+    function currentNote() {
+      return state.sequence[state.position];
     }
 
     function setFeedback(type, mark, text) {
@@ -295,16 +321,9 @@
     function answerSolfege(value) {
       if (state.revealed) chooseQuestion();
       const answerValue = String(value);
-      const isCorrect = answerValue === state.current.answer;
-      state.answered++;
-      if (isCorrect) { state.correct++; state.streak++; state.best = Math.max(state.best, state.streak); }
-      else state.streak = 0;
-      updateStats();
-      const label = `${state.current.letter}${state.current.octave}（${state.current.answer}）`;
-      if (isCorrect) setFeedback('correct', '✓', `答对了！这是 ${label}，马上进入下一题。`);
-      else setFeedback('wrong', '×', `再看一眼：这是 ${label}。记住它在谱表中的位置，再试下一题。`);
-      state.revealed = true;
-      scheduleNextQuestion(isCorrect);
+      const note = currentNote();
+      const isCorrect = answerValue === note.answer;
+      handleNoteAnswer(isCorrect, `${note.letter}${note.octave}（${note.answer}）`);
     }
 
     function noteToMidi(letter, octave) {
@@ -317,19 +336,36 @@
         return;
       }
       if (state.revealed) chooseQuestion();
-      const targetMidi = noteToMidi(state.current.letter, state.current.octave);
+      const note = currentNote();
+      const targetMidi = noteToMidi(note.letter, note.octave);
       const selectedMidi = noteToMidi(pitch.slice(0, 1), Number(pitch.slice(1)));
       const isCorrect = selectedMidi === targetMidi;
+      const label = `${note.letter}${note.octave}（${note.answer}）`;
+      const wrongText = pitch[0] === note.letter ? `唱名对了，但八度不对：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。` : `再看一眼：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。`;
+      handleNoteAnswer(isCorrect, label, wrongText);
+    }
+
+    function handleNoteAnswer(isCorrect, label, wrongText) {
+      const total = state.sequence.length;
+      const currentIndex = state.position;
       state.answered++;
       if (isCorrect) { state.correct++; state.streak++; state.best = Math.max(state.best, state.streak); }
       else state.streak = 0;
       updateStats();
-      const label = `${state.current.letter}${state.current.octave}（${state.current.answer}）`;
-      if (isCorrect) setFeedback('correct', '✓', `按对了！这是 ${label}，马上进入下一题。`);
-      else if (pitch[0] === state.current.letter) setFeedback('wrong', '↕', `唱名对了，但八度不对：谱上是 ${label}，你按的是 ${pitch}。`);
-      else setFeedback('wrong', '×', `再看一眼：谱上是 ${label}，你按的是 ${pitch}。`);
+      if (!isCorrect) {
+        setFeedback('wrong', '×', wrongText || `第 ${currentIndex + 1} / ${total} 个音是 ${label}，再试一次。`);
+        return;
+      }
+      if (currentIndex < total - 1) {
+        state.position++;
+        state.current = state.sequence[state.position];
+        drawStaff(state.sequence);
+        setFeedback('correct', '✓', `答对了！继续识别第 ${state.position + 1} / ${total} 个音。`);
+        return;
+      }
       state.revealed = true;
-      scheduleNextQuestion(isCorrect);
+      setFeedback('correct', '✓', `整组答对！${total} 个音全部识别完成，马上进入下一题。`);
+      scheduleNextQuestion(true);
     }
 
     function scheduleNextQuestion(isCorrect) {
@@ -372,8 +408,9 @@
 
     function reveal() {
       if (state.revealed) return;
-      const label = `${state.current.letter}${state.current.octave}（${state.current.answer}）`;
-      setFeedback('wrong', '◌', `答案是 ${label}。本题不计分，记住位置后点击“换一个”。`);
+      const note = currentNote();
+      const label = `${note.letter}${note.octave}（${note.answer}）`;
+      setFeedback('wrong', '◌', `第 ${state.position + 1} / ${state.sequence.length} 个音答案是 ${label}。本题不计分，记住位置后点击“换一个”。`);
       state.revealed = true;
     }
 
@@ -405,12 +442,18 @@
       document.getElementById('piano').classList.toggle('hidden', state.mode !== 'piano');
       document.getElementById('pianoLabel').classList.toggle('hidden', state.mode !== 'piano');
       document.getElementById('solfegeKeys').classList.toggle('hidden', state.mode !== 'solfege');
-      staffCaption.textContent = `${clefs[state.clef].name} · 自然音 · ${state.mode === 'piano' ? '请选择对应琴键' : '请选择 1–7'}`;
+      staffCaption.textContent = `${clefs[state.clef].name} · ${state.sequence.length} 个音 · ${state.mode === 'piano' ? '从左到右点击琴键' : '从左到右选择 1–7'}`;
     }));
     document.querySelectorAll('#clefSelector button').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('#clefSelector button').forEach(item => item.classList.remove('active'));
       button.classList.add('active');
       state.clef = button.dataset.clef;
+      chooseQuestion();
+    }));
+    document.querySelectorAll('#lengthSelector button').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('#lengthSelector button').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      state.sequenceLength = Number(button.dataset.length);
       chooseQuestion();
     }));
     document.querySelectorAll('input[name="range"]').forEach(input => input.addEventListener('change', () => { state.range = input.value; chooseQuestion(); }));
