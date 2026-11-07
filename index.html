@@ -301,9 +301,10 @@
       else state.streak = 0;
       updateStats();
       const label = `${state.current.letter}${state.current.octave}（${state.current.answer}）`;
-      if (isCorrect) setFeedback('correct', '✓', `答对了！这是 ${label}，继续保持这个节奏。`);
+      if (isCorrect) setFeedback('correct', '✓', `答对了！这是 ${label}，马上进入下一题。`);
       else setFeedback('wrong', '×', `再看一眼：这是 ${label}。记住它在谱表中的位置，再试下一题。`);
       state.revealed = true;
+      scheduleNextQuestion(isCorrect);
     }
 
     function noteToMidi(letter, octave) {
@@ -324,10 +325,18 @@
       else state.streak = 0;
       updateStats();
       const label = `${state.current.letter}${state.current.octave}（${state.current.answer}）`;
-      if (isCorrect) setFeedback('correct', '✓', `按对了！这是 ${label}，继续保持这个节奏。`);
+      if (isCorrect) setFeedback('correct', '✓', `按对了！这是 ${label}，马上进入下一题。`);
       else if (pitch[0] === state.current.letter) setFeedback('wrong', '↕', `唱名对了，但八度不对：谱上是 ${label}，你按的是 ${pitch}。`);
       else setFeedback('wrong', '×', `再看一眼：谱上是 ${label}，你按的是 ${pitch}。`);
       state.revealed = true;
+      scheduleNextQuestion(isCorrect);
+    }
+
+    function scheduleNextQuestion(isCorrect) {
+      if (!isCorrect) return;
+      window.setTimeout(() => {
+        if (state.revealed) chooseQuestion();
+      }, 800);
     }
 
     function renderPiano() {
