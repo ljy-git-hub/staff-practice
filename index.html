@@ -69,11 +69,13 @@
     .card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); }
     .practice { padding: clamp(20px, 4vw, 36px); }
     .practice-top { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 18px; }
+    .practice-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .practice-title { margin: 0; font-size: 19px; letter-spacing: -.02em; }
     .practice-hint { color: var(--muted); font-size: 13px; margin: 5px 0 0; }
     .ghost-btn, .primary-btn, .answer-btn, .key-btn { border: 0; font: inherit; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease; }
     .ghost-btn { border: 1px solid var(--line); color: var(--ink); background: var(--paper); border-radius: 11px; padding: 9px 12px; font-size: 13px; }
     .ghost-btn:hover { border-color: #aebed2; }
+    .sound-toggle.off { opacity: .62; }
 
     .staff-wrap { position: relative; overflow: hidden; border-radius: 16px; background: var(--staff-paper); border: 1px solid var(--line); padding: 12px 10px 6px; }
     #staff { display: block; width: 100%; height: auto; min-height: 245px; }
@@ -211,7 +213,10 @@
             <h2 class="practice-title">这是什么音？</h2>
             <p class="practice-hint">从左到右识别音符，按顺序用钢琴键或 1–7 唱名作答。</p>
           </div>
-          <button class="ghost-btn" id="newQuestion" type="button">换一个 ↻</button>
+          <div class="practice-actions">
+            <button class="ghost-btn" id="soundToggle" type="button">🔊 音效 开</button>
+            <button class="ghost-btn" id="newQuestion" type="button">换一个 ↻</button>
+          </div>
         </div>
 
         <div class="staff-wrap">
@@ -302,7 +307,8 @@
       }
     };
 
-    const state = { clef: 'treble', range: 'basic', mode: 'piano', sequenceLength: 1, sequence: [], position: 0, current: null, streak: 0, best: 0, correct: 0, answered: 0, revealed: false, startedAt: Date.now() };
+    const state = { clef: 'treble', range: 'basic', mode: 'piano', sequenceLength: 1, sequence: [], position: 0, current: null, streak: 0, best: 0, correct: 0, answered: 0, revealed: false, soundEnabled: true, startedAt: Date.now() };
+    let audioContext = null;
     const svg = document.getElementById('staff');
     const feedback = document.getElementById('feedback');
     const staffCaption = document.getElementById('staffCaption');
@@ -387,7 +393,38 @@
       return ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[letter]) + (octave + 1) * 12;
     }
 
+    function pitchToMidi(pitch) {
+      const letter = pitch.slice(0, 1);
+      const accidental = pitch.includes('♯') ? 1 : 0;
+      const octave = Number(pitch.match(/\d+$/)[0]);
+      return noteToMidi(letter, octave) + accidental;
+    }
+
+    function playTone(pitch) {
+      if (!state.soundEnabled) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioContext) audioContext = new AudioContextClass();
+        audioContext.resume();
+        const now = audioContext.currentTime;
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.type = 'triangle';
+        oscillator.frequency.value = 440 * Math.pow(2, (pitchToMidi(pitch) - 69) / 12);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+        oscillator.connect(gain).connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.8);
+      } catch (error) {
+        // 某些浏览器可能禁用音频上下文，点击练习仍应正常计分。
+      }
+    }
+
     function answerPiano(pitch, isBlack) {
+      playTone(pitch);
       if (isBlack) {
         setFeedback('ready', '♩', '当前练习是自然音，黑键不计分；请找相邻的白键。');
         return;
@@ -395,7 +432,7 @@
       if (state.revealed) chooseQuestion();
       const note = currentNote();
       const targetMidi = noteToMidi(note.letter, note.octave);
-      const selectedMidi = noteToMidi(pitch.slice(0, 1), Number(pitch.slice(1)));
+      const selectedMidi = pitchToMidi(pitch);
       const isCorrect = selectedMidi === targetMidi;
       const label = `${note.letter}${note.octave}（${note.answer}）`;
       const wrongText = pitch[0] === note.letter ? `唱名对了，但八度不对：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。` : `再看一眼：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。`;
@@ -492,6 +529,12 @@
     document.addEventListener('keydown', event => { if (state.mode === 'solfege' && /^[1-7]$/.test(event.key)) answerSolfege(event.key); });
     document.getElementById('showAnswer').addEventListener('click', reveal);
     document.getElementById('newQuestion').addEventListener('click', chooseQuestion);
+    document.getElementById('soundToggle').addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      const button = document.getElementById('soundToggle');
+      button.textContent = state.soundEnabled ? '🔊 音效 开' : '🔇 音效 关';
+      button.classList.toggle('off', !state.soundEnabled);
+    });
     document.querySelectorAll('#inputMode button').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('#inputMode button').forEach(item => item.classList.remove('active'));
       button.classList.add('active');
