@@ -78,7 +78,7 @@
     .sound-toggle.off { opacity: .62; }
 
     .staff-wrap { position: relative; overflow: hidden; border-radius: 16px; background: var(--staff-paper); border: 1px solid var(--line); padding: 12px 10px 6px; }
-    #staff { display: block; width: 100%; height: auto; min-height: 245px; }
+    #staff { display: block; width: 100%; height: auto; }
     .staff-caption { text-align: center; color: var(--muted); font-size: 12px; margin: 2px 0 5px; }
 
     .feedback { min-height: 51px; margin: 18px 0 12px; border-radius: 13px; padding: 12px 15px; display: flex; gap: 10px; align-items: center; background: var(--surface); color: var(--muted); font-size: 14px; line-height: 1.5; }
@@ -115,6 +115,9 @@
     .segmented { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background: var(--surface); border-radius: 11px; padding: 4px; }
     .segmented button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 8px 5px; border-radius: 8px; cursor: pointer; }
     .segmented button.active { background: var(--paper); color: var(--ink); box-shadow: 0 2px 7px rgba(30,54,92,.1); font-weight: 700; }
+    .segmented button:disabled { opacity: .35; cursor: not-allowed; }
+    .clef-selector { grid-template-columns: repeat(3, 1fr); }
+    .field-help { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 8px 0 0; }
     .length-selector { grid-template-columns: repeat(6, 1fr); }
     .length-selector button { padding-left: 3px; padding-right: 3px; }
     .range-grid { display: grid; gap: 7px; }
@@ -220,7 +223,7 @@
         </div>
 
         <div class="staff-wrap">
-          <svg id="staff" viewBox="0 0 700 260" role="img" aria-label="随机生成的五线谱音符"></svg>
+          <svg id="staff" viewBox="0 0 700 410" role="img" aria-label="高低音双谱表练习，蓝圈标记当前音符"></svg>
           <div class="staff-caption" id="staffCaption">高音谱号 · 自然音</div>
         </div>
 
@@ -247,11 +250,13 @@
         <section class="card side">
           <h2>练习设置</h2>
           <div class="field">
-            <span class="field-label">谱号</span>
-            <div class="segmented" id="clefSelector">
+            <span class="field-label">练习模式</span>
+            <div class="segmented clef-selector" id="clefSelector">
               <button class="active" data-clef="treble" type="button">高音谱号</button>
               <button data-clef="bass" type="button">低音谱号</button>
+              <button data-clef="mixed" type="button">先低后高</button>
             </div>
+            <p class="field-help" id="clefHelp">始终显示高低音双谱表，当前练习高音。</p>
           </div>
           <div class="field">
             <span class="field-label">一题几个音</span>
@@ -315,61 +320,83 @@
     const piano = document.getElementById('piano');
     const pianoLabel = document.getElementById('pianoLabel');
 
-    function getPool() {
-      const notes = clefs[state.clef].notes;
-      if (state.range === 'basic') return state.clef === 'treble' ? notes.slice(2, 11) : notes.slice(4, 13); // only the five-line staff
+    function getPool(clef) {
+      const notes = clefs[clef].notes;
+      if (state.range === 'basic') return clef === 'treble' ? notes.slice(2, 11) : notes.slice(4, 13); // only the five-line staff
       if (state.range === 'extend') return notes.slice(0, 13);
       return notes;
     }
 
     function drawStaff(notes) {
-      const width = 700, bottom = 174, gap = 20, left = 90, right = 622;
-      const lines = Array.from({ length: 5 }, (_, i) => `<line x1="${left}" y1="${bottom - i * gap}" x2="${right}" y2="${bottom - i * gap}" class="staff-line"/>`).join('');
+      const gap = 18, left = 90, right = 650;
+      const bottoms = { treble: 142, bass: 330 };
       const stepUnit = gap / 2;
-      const mid = bottom - 4 * stepUnit;
+      const staffMarkup = ['treble', 'bass'].map(clef => {
+        const bottom = bottoms[clef];
+        const lines = Array.from({ length: 5 }, (_, i) => `<line x1="${left}" y1="${bottom - i * gap}" x2="${right}" y2="${bottom - i * gap}" class="staff-line"/>`).join('');
+        const symbol = clef === 'treble' ? '𝄞' : '𝄢';
+        return `<g data-staff="${clef}">${lines}<text x="74" y="${clef === 'treble' ? bottom + 9 : bottom - 9}" font-size="84" font-family="Times New Roman, Noto Serif, serif" fill="var(--note-ink)">${symbol}</text></g>`;
+      }).join('');
       const noteXs = notes.length === 1 ? [430] : notes.map((_, index) => 190 + index * (430 / (notes.length - 1)));
       const noteMarkup = notes.map((note, index) => {
+        const bottom = bottoms[note.clef];
         const x = noteXs[index];
         const y = bottom - note.step * stepUnit;
-        const stemUp = y >= mid;
+        const stemUp = note.step <= 4;
         const stemX = stemUp ? x + 13 : x - 13;
-        const stemY2 = stemUp ? y - 57 : y + 57;
+        const stemY2 = stemUp ? y - 54 : y + 54;
         const ledger = [];
-        const ledgerX1 = x - 30, ledgerX2 = x + 30;
+        const ledgerX1 = x - 25, ledgerX2 = x + 25;
         if (note.step < 0) for (let s = -2; s >= note.step; s -= 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
         if (note.step > 8) for (let s = 10; s <= note.step; s += 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
-        const active = index === state.position ? `<circle cx="${x}" cy="${y}" r="26" class="active-note"/>` : '';
+        const active = index === state.position ? `<circle cx="${x}" cy="${y}" r="24" class="active-note"/>` : '';
         const head = `<ellipse cx="${x}" cy="${y}" rx="15" ry="10" transform="rotate(-18 ${x} ${y})" class="note-head"/>`;
         const stem = `<line x1="${stemX}" y1="${y - (stemUp ? 3 : -3)}" x2="${stemX}" y2="${stemY2}" class="note-stem"/>`;
-        return `${ledger.join('')}${active}${head}${stem}`;
+        return `<g data-note-clef="${note.clef}" data-note-index="${index}">${active}${ledger.join('')}${head}${stem}</g>`;
       }).join('');
-      const clefSymbol = state.clef === 'treble' ? '𝄞' : '𝄢';
       svg.innerHTML = `<style>
-        .staff-line { stroke: var(--staff-line); stroke-width: 1.6; }
-        .ledger-line { stroke: var(--staff-line); stroke-width: 1.6; }
+        .staff-line, .ledger-line { stroke: var(--staff-line); stroke-width: 1.6; }
         .active-note { fill: var(--blue-soft); stroke: var(--selection); stroke-width: 1.5; }
         .note-head { fill: var(--note-ink); }
         .note-stem { stroke: var(--note-ink); stroke-width: 3; stroke-linecap: round; }
       </style>
-      <rect x="0" y="0" width="700" height="260" fill="var(--staff-paper)"/>
-      <g>${lines}</g>
-      <text x="74" y="${state.clef === 'treble' ? 183 : 164}" font-size="92" font-family="Times New Roman, Noto Serif, serif" fill="var(--note-ink)">${clefSymbol}</text>
-      <line x1="${right + 14}" y1="${bottom - 4 * gap}" x2="${right + 14}" y2="${bottom}" stroke="var(--line)" stroke-width="1.5"/>
+      <rect x="0" y="0" width="700" height="410" fill="var(--staff-paper)"/>
+      ${staffMarkup}
+      <path d="M 66 70 H 58 V 330 H 66 M 90 70 V 330 M 650 70 V 330" fill="none" stroke="var(--staff-line)" stroke-width="1.6"/>
       <g>${noteMarkup}</g>`;
     }
 
     function chooseQuestion() {
-      const pool = getPool();
-      const count = Math.min(state.sequenceLength, pool.length);
-      const selected = [...pool].sort(() => Math.random() - 0.5).slice(0, count);
-      state.sequence = selected.map(next => ({ letter: next[0], octave: next[1], step: next[2], answer: solfege[next[0]], pitch: `${next[0]}${next[1]}` }));
+      const count = state.sequenceLength;
+      const bassCount = Math.ceil(count / 2);
+      const groups = state.clef === 'mixed'
+        ? [{ clef: 'bass', count: bassCount }, { clef: 'treble', count: count - bassCount }]
+        : [{ clef: state.clef, count }];
+      state.sequence = groups.flatMap(group => {
+        const pool = [...getPool(group.clef)];
+        // 洗牌后取音，同一谱表内不重复。
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        return pool.slice(0, group.count).map(next => ({ clef: group.clef, letter: next[0], octave: next[1], step: next[2], answer: solfege[next[0]], pitch: `${next[0]}${next[1]}` }));
+      });
       state.position = 0;
       state.current = state.sequence[0];
       state.revealed = false;
       drawStaff(state.sequence);
       renderPiano();
-      staffCaption.textContent = `${clefs[state.clef].name} · ${count} 个不同音 · ${state.mode === 'piano' ? '从左到右点击琴键' : '从左到右选择 1–7'}`;
-      setFeedback('ready', '✦', `准备好了吗？先观察 ${count} 个音符的位置，从左到右识别。`);
+      updateCaption();
+      document.getElementById('clefHelp').textContent = state.clef === 'mixed'
+        ? `先练 ${bassCount} 个低音，再练 ${count - bassCount} 个高音；键盘随当前音符自动切换。`
+        : `始终显示高低音双谱表，当前练习${state.clef === 'treble' ? '高音' : '低音'}。`;
+      setFeedback('ready', '✦', state.clef === 'mixed'
+        ? `先低后高：${bassCount} 个低音 → ${count - bassCount} 个高音，从左到右跟随蓝圈作答。`
+        : `准备好了吗？先观察 ${count} 个音符的位置，从左到右识别。`);
+    }
+
+    function updateCaption() {
+      staffCaption.textContent = `高低音双谱表 · 当前${clefs[currentNote().clef].name} · 第 ${state.position + 1} / ${state.sequence.length} 个音 · ${state.mode === 'piano' ? '点击琴键' : '选择 1–7'}`;
     }
 
     function currentNote() {
@@ -454,7 +481,12 @@
         state.position++;
         state.current = state.sequence[state.position];
         drawStaff(state.sequence);
-        setFeedback('correct', '✓', `答对了！继续识别第 ${state.position + 1} / ${total} 个音。`);
+        const switchedClef = state.sequence[currentIndex].clef !== currentNote().clef;
+        if (switchedClef) renderPiano();
+        updateCaption();
+        setFeedback('correct', '✓', switchedClef
+          ? `低音部分完成！已切换到高音键盘，继续识别第 ${state.position + 1} / ${total} 个音。`
+          : `答对了！继续识别第 ${state.position + 1} / ${total} 个音。`);
         return;
       }
       state.revealed = true;
@@ -470,7 +502,8 @@
     }
 
     function renderPiano() {
-      const startOctave = state.clef === 'treble' ? 4 : 2;
+      const activeClef = currentNote().clef;
+      const startOctave = activeClef === 'treble' ? 4 : 2;
       const sequence = [];
       const names = [
         ['C', false], ['C♯', true], ['D', false], ['D♯', true], ['E', false], ['F', false], ['F♯', true],
@@ -497,7 +530,7 @@
         button.addEventListener('click', () => answerPiano(item.pitch, item.black));
         piano.appendChild(button);
       });
-      pianoLabel.textContent = `${clefs[state.clef].name}键盘 · 点击琴键作答（黑键为升降音，不计分）`;
+      pianoLabel.textContent = `${activeClef === 'treble' ? '高音' : '低音'}键盘 · C${startOctave}–B${startOctave + 1} · 点击琴键作答（黑键不计分）`;
     }
 
     function reveal() {
@@ -542,12 +575,16 @@
       document.getElementById('piano').classList.toggle('hidden', state.mode !== 'piano');
       document.getElementById('pianoLabel').classList.toggle('hidden', state.mode !== 'piano');
       document.getElementById('solfegeKeys').classList.toggle('hidden', state.mode !== 'solfege');
-      staffCaption.textContent = `${clefs[state.clef].name} · ${state.sequence.length} 个音 · ${state.mode === 'piano' ? '从左到右点击琴键' : '从左到右选择 1–7'}`;
+      updateCaption();
     }));
     document.querySelectorAll('#clefSelector button').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('#clefSelector button').forEach(item => item.classList.remove('active'));
       button.classList.add('active');
       state.clef = button.dataset.clef;
+      const singleNoteButton = document.querySelector('#lengthSelector [data-length="1"]');
+      singleNoteButton.disabled = state.clef === 'mixed';
+      if (state.clef === 'mixed' && state.sequenceLength === 1) state.sequenceLength = 6;
+      document.querySelectorAll('#lengthSelector button').forEach(item => item.classList.toggle('active', Number(item.dataset.length) === state.sequenceLength));
       chooseQuestion();
     }));
     document.querySelectorAll('#lengthSelector button').forEach(button => button.addEventListener('click', () => {
