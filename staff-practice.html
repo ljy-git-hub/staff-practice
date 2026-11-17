@@ -346,7 +346,7 @@
         <div class="exercise-bar">
           <label><span data-t="practice"></span><select id="exercise"><option value="random" data-t="random"></option><option value="patterns" data-t="patterns"></option><option value="review" data-t="review"></option><option value="songs" data-t="songs"></option></select></label>
           <div class="song-options hidden" id="songOptions">
-            <label><span data-t="song"></span><select id="song"><option value="twinkle" data-t="twinkle"></option><option value="ode" data-t="ode"></option><option value="brother" data-t="brother"></option></select></label>
+            <label><span data-t="song"></span><select id="song"><option value="twinkle" data-t="twinkle"></option><option value="ode" data-t="ode"></option><option value="brother" data-t="brother"></option><option value="birthday" data-t="birthday"></option></select></label>
             <label><span data-t="style"></span><select id="pacing"><option value="learn" data-t="learn"></option><option value="rhythm" data-t="rhythm"></option></select></label>
           </div>
         </div>
@@ -355,7 +355,7 @@
           <button class="ghost-btn" id="demo" type="button" data-t="demo"></button>
           <button class="ghost-btn hidden" id="startRhythm" type="button" data-t="start"></button>
           <span class="beat-pulse" id="beatPulse" aria-label="当前拍数">♩</span>
-          <p class="song-help" data-t="songHelp"></p>
+          <p class="song-help" id="songHelp" data-t="songHelp"></p>
         </div>
         </details>
         <div class="staff-wrap" id="staffWrap">
@@ -406,7 +406,7 @@
     // 所有新增界面文案集中维护；这是独立 HTML，不使用 E10 平台标签 ID。
     const T = {
       practice: '练习方式', random: '随机识音', patterns: '旋律片段', review: '弱项复习', songs: '入门短曲',
-      song: '选择短曲', twinkle: '小星星 · 开头四小节', ode: '欢乐颂 · 开头四小节', brother: '两只老虎 · 开头四小节',
+      song: '选择短曲', twinkle: '小星星 · 开头四小节', ode: '欢乐颂 · 开头四小节', brother: '两只老虎 · 开头四小节', birthday: '祝你生日快乐 · 完整旋律',
       songHelp: 'C 大调单声部短曲。按起音节奏点击；长音等够拍数再弹下一音，暂不评估按住琴键的时长。',
       style: '练习节奏', learn: '慢慢认音', rhythm: '跟拍练习', tempo: '速度（每分钟拍数）', demo: '♫ 听示范', start: '▶ 开始跟拍', stop: '■ 停止',
       labels: '显示琴键名称', highlight: '高亮当前音符', focus: '⛶ 专注布局', exitFocus: '退出专注',
@@ -416,10 +416,11 @@
       firstAccuracy: '首次正确率', counted: '已练音符', today: '本次目标 20 音', soundOn: '🔊 音效 开', soundOff: '🔇 音效 关',
       next: '换一组 ↻', replay: '重练本曲 ↻', reveal: '提示当前音（记为未独立答对）', settings: '练习设置',
       notes: '一组几个音', singleHelp: '高低音双谱表；跟随当前练习的谱号读谱。', mixedHelp: '先低音、后高音；宽屏可同时显示更宽的键盘。',
-      countIn: n => `预备：${n} / 4 拍，准备从第一个音开始。`,
+      countIn: (n,total) => `预备：${n} / ${total} 拍，准备从第一个音开始。`,
       ready: n => `共 ${n} 个音，从左到右作答。答错可以纠正，首次回答计入统计。`,
       songReady: n => `共 ${n} 个音，先听示范，再慢慢弹；也可以切换“跟拍练习”。`,
-      waitStart: '点击“开始跟拍”，听完四拍预备后开始。', demoPlaying: '正在示范：听每个音的长短，跟着蓝圈读谱。',
+      waitStart: n => `点击“开始跟拍”，听完 ${n} 拍预备后开始。`,
+      birthdayHelp: '3/4 拍完整旋律，开头两个 G 是弱起的半拍音；跟拍先听五拍预备，从第 3 拍进入。', demoPlaying: '正在示范：听每个音的长短，跟着蓝圈读谱。',
       silentDemo: '音效已关闭，请先开启音效再听示范。', audioFailed: '浏览器未能启动声音，请再点击一次；认音练习仍然可用。',
       black: '当前练习是自然音。黑键可以发声，但不计分；请找对应白键。',
       early: '稍早了，听节拍，等蓝圈到达下一个音再按。',
@@ -443,12 +444,16 @@
       treble: [['C',4,-2],['D',4,-1],['E',4,0],['F',4,1],['G',4,2],['A',4,3],['B',4,4],['C',5,5],['D',5,6],['E',5,7],['F',5,8],['G',5,9],['A',5,10],['B',5,11]],
       bass: [['C',2,-4],['D',2,-3],['E',2,-2],['F',2,-1],['G',2,0],['A',2,1],['B',2,2],['C',3,3],['D',3,4],['E',3,5],['F',3,6],['G',3,7],['A',3,8],['B',3,9]],
     };
-    // 传统旋律／公版作品的简化开头，只使用单声部自然音，4/4 拍。
+    // 单声部自然音旋律；生日歌保留完整四句及三拍子弱起，其余为四拍子开头片段。
     const SONGS = {
       twinkle: [['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2],['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2]],
       ode: [['E4',1],['E4',1],['F4',1],['G4',1],['G4',1],['F4',1],['E4',1],['D4',1],['C4',1],['C4',1],['D4',1],['E4',1],['E4',1.5],['D4',.5],['D4',2]],
+      birthday: [['G4',.5],['G4',.5],['A4',1],['G4',1],['C5',1],['B4',2],['G4',.5],['G4',.5],['A4',1],['G4',1],['D5',1],['C5',2],['G4',.5],['G4',.5],['G5',1],['E5',1],['C5',1],['B4',1],['A4',1],['F5',.5],['F5',.5],['E5',1],['C5',1],['D5',1],['C5',2]],
       brother: [['C4',1],['D4',1],['E4',1],['C4',1],['C4',1],['D4',1],['E4',1],['C4',1],['E4',1],['F4',1],['G4',2],['E4',1],['F4',1],['G4',2]],
     };
+    function songTiming() {
+      return state.song === 'birthday' ? {beatsPerBar:3, pickupOffset:2, countIn:5} : {beatsPerBar:4, pickupOffset:0, countIn:4};
+    }
     const $ = id => document.getElementById(id);
     document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T[el.dataset.t]; });
     let mastery = {};
@@ -534,8 +539,9 @@
       $('randomOptions').classList.toggle('hidden', state.exercise === 'songs');
       $('rhythmControls').classList.toggle('hidden', state.exercise !== 'songs');
       $('clefHelp').textContent = state.clef === 'mixed' ? T.mixedHelp : T.singleHelp;
+      $('songHelp').textContent=state.song==='birthday'?T.birthdayHelp+' '+T.songHelp:T.songHelp;
       drawStaff(); renderPiano(); renderMastery();
-      setFeedback('ready','✦', state.exercise === 'songs' ? (state.pacing === 'rhythm' ? T.waitStart : T.songReady(state.sequence.length)) : T.ready(state.sequence.length));
+      setFeedback('ready','✦', state.exercise === 'songs' ? (state.pacing === 'rhythm' ? T.waitStart(songTiming().countIn) : T.songReady(state.sequence.length)) : T.ready(state.sequence.length));
     }
     function visibleWindow() {
       const width = Math.max(280, $('staffWrap').clientWidth - 20);
@@ -545,6 +551,7 @@
     }
     function drawStaff() {
       const {width,capacity,start,end} = visibleWindow();
+      const {beatsPerBar,pickupOffset} = songTiming();
       const compact=landscape.matches||state.manualLandscape;
       const dual = state.exercise !== 'songs' && (!compact || state.clef === 'mixed');
       const height = dual ? (compact?208:316) : (compact?90:192);
@@ -571,13 +578,13 @@
         for(let s=-2;s>=note.step;s-=2) ledger+=`<line x1="${x-15}" y1="${bottom-s*stepUnit}" x2="${x+15}" y2="${bottom-s*stepUnit}" class="staff-line"/>`;
         for(let s=10;s<=note.step;s+=2) ledger+=`<line x1="${x-15}" y1="${bottom-s*stepUnit}" x2="${x+15}" y2="${bottom-s*stepUnit}" class="staff-line"/>`;
         const active = state.highlight && index===state.position && !state.finished ? `<circle cx="${x}" cy="${y}" r="${compact?14:19}" fill="var(--blue-soft)" stroke="var(--selection)"/>` : '';
-        const bar = state.exercise==='songs' && beat%4===0 ? `<line x1="${x-21}" y1="${bottom-4*gap}" x2="${x-21}" y2="${bottom}" class="staff-line"/><text x="${x-16}" y="${bottom-4*gap-12}" class="measure-label">${Math.floor(beat/4)+1}</text>` : '';
+        const bar = state.exercise==='songs' && (beat+pickupOffset)%beatsPerBar===0 ? `<line x1="${x-21}" y1="${bottom-4*gap}" x2="${x-21}" y2="${bottom}" class="staff-line"/><text x="${x-16}" y="${bottom-4*gap-12}" class="measure-label">${Math.floor((beat+pickupOffset)/beatsPerBar)+(pickupOffset?0:1)}</text>` : '';
         beat+=note.beats;
         const half = note.beats===2, dot = note.beats===1.5;
         return `<g data-note-index="${index}">${bar}${active}${ledger}<ellipse cx="${x}" cy="${y}" rx="${radius}" ry="${radius*.66}" transform="rotate(-18 ${x} ${y})" fill="${half?'var(--staff-paper)':color}" stroke="${color}" stroke-width="${half?2.5:1}"/><line x1="${stemX}" y1="${y}" x2="${stemX}" y2="${stemEnd}" stroke="${color}" stroke-width="2"/>${note.beats===.5?`<path d="M ${stemX} ${stemEnd} q 17 ${up?9:-9} 5 ${up?23:-23}" fill="none" stroke="${color}" stroke-width="3"/>`:''}${dot?`<circle cx="${x+16}" cy="${y-3}" r="2.3" fill="${color}"/>`:''}<text x="${x}" y="${bottom+(compact?(dual?31:25):42)}" class="note-duration">${state.exercise==='songs'?note.beats+' 拍':index+1}</text></g>`;
       }).join('');
-      svg.innerHTML = `<style>.staff-line{stroke:var(--staff-line);stroke-width:1.3}.measure-label,.note-duration{fill:var(--muted);font:11px system-ui;text-anchor:middle}</style><rect width="${width}" height="${height}" fill="var(--staff-paper)"/>${staff}${markup}${state.exercise==='songs'?`<text x="65" y="${compact?(dual?20:10):48}" fill="var(--muted)" font-size="12">4/4 · C</text>`:''}`;
-      $('staffCaption').textContent = T.caption(clefNames[currentNote().clef],state.position+1,state.sequence.length,Math.floor(start/capacity)+1,Math.ceil(state.sequence.length/capacity));
+      svg.innerHTML = `<style>.staff-line{stroke:var(--staff-line);stroke-width:1.3}.measure-label,.note-duration{fill:var(--muted);font:11px system-ui;text-anchor:middle}</style><rect width="${width}" height="${height}" fill="var(--staff-paper)"/>${staff}${markup}${state.exercise==='songs'?`<text x="65" y="${compact?(dual?20:10):48}" fill="var(--muted)" font-size="12">${beatsPerBar}/4 · C${pickupOffset?' · 弱起':''}</text>`:''}`;
+      $('staffCaption').textContent = (state.exercise==='songs'?T[state.song]+' · ':'')+T.caption(clefNames[currentNote().clef],state.position+1,state.sequence.length,Math.floor(start/capacity)+1,Math.ceil(state.sequence.length/capacity));
       $('phraseProgress').textContent = `${state.finished ? state.sequence.length : state.position} / ${state.sequence.length}`;
       $('phraseFill').style.width = `${(state.finished?1:state.position/state.sequence.length)*100}%`;
     }
@@ -624,7 +631,7 @@
         playTone(letter+note.octave);
       }
       if(state.finished || state.running==='demo' || state.running==='countdown') return;
-      if(state.exercise==='songs' && state.pacing==='rhythm' && state.running!=='rhythm') {setFeedback('ready','♩',T.waitStart);return;}
+      if(state.exercise==='songs' && state.pacing==='rhythm' && state.running!=='rhythm') {setFeedback('ready','♩',T.waitStart(songTiming().countIn));return;}
       if(isBlack) {setFeedback('ready','♩',T.black);return;}
       if(state.running==='rhythm') {
         const expected=state.onsets[state.position];
@@ -680,16 +687,17 @@
       const bpm=Number($('tempo').value);state.beatMs=60000/bpm;
       state.onsets=[];let total=0;state.sequence.forEach(n=>{state.onsets.push(total);total+=n.beats;});
       state.totalBeats=total;
-      state.transportStart=performance.now()+4*state.beatMs;
-      const audioStart=audioContext.currentTime+4*60/bpm;
+      const {beatsPerBar,pickupOffset,countIn}=songTiming();
+      state.transportStart=performance.now()+countIn*state.beatMs;
+      const audioStart=audioContext.currentTime+countIn*60/bpm;
       state.running='countdown';$('demo').disabled=true;$('startRhythm').textContent=T.stop;$('startRhythm').classList.remove('hidden');
       // 提前调度音频保证拍点稳定；停止、换曲或换模式会取消全部已调度声音。
-      if(state.soundEnabled)for(let b=-4;b<total;b++)tone(b%4===0?90:83,audioStart+b*60/bpm,.035,.045,'sine',true);
+      if(state.soundEnabled)for(let b=-countIn;b<total;b++)tone((b+pickupOffset)%beatsPerBar===0?90:83,audioStart+b*60/bpm,.035,.045,'sine',true);
       if(demo)state.sequence.forEach((n,i)=>tone(pitchToMidi(n.pitch),audioStart+state.onsets[i]*60/bpm,n.beats*60/bpm*.85,.13,'triangle',true));
       function tick() {
         if(serial!==runSerial)return;
         const beat=(performance.now()-state.transportStart)/state.beatMs;
-        if(beat<0) {setFeedback('ready','♩',T.countIn(Math.max(1,Math.min(4,Math.floor(beat+4)+1))));}
+        if(beat<0) {setFeedback('ready','♩',T.countIn(Math.max(1,Math.min(countIn,Math.floor(beat+countIn)+1)),countIn));}
         else if(beat>=total) {
           if(!demo)state.sequence.forEach(n=>{if(!n.resolved){recordFirst(n,false);n.status='missed';}});
           const right=state.sequence.filter(n=>n.firstCorrect).length;
@@ -700,7 +708,7 @@
           if(state.running==='countdown'&&!demo)setFeedback('ready','♩',T.rhythmNow(1));
           state.running=demo?'demo':'rhythm';
           const index=state.onsets.findIndex((onset,i)=>beat>=onset && beat<onset+state.sequence[i].beats);
-          $('beatPulse').textContent=String(Math.floor(beat)%4+1);
+          $('beatPulse').textContent=String((Math.floor(beat)+pickupOffset)%beatsPerBar+1);
           $('beatPulse').classList.toggle('pulse-on',beat%1<.2);
           if(demo){if(state.position!==index){state.position=index;drawStaff();}setFeedback('ready','♫',T.demoPlaying);}
           else {
