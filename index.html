@@ -273,21 +273,46 @@
     .landscape .staff-wrap { position: sticky; top: 0; z-index: 3; }
     .landscape #staff { max-height: 208px; }
 
-    /* 手机横屏短曲把谱面与琴键放在同一视口，曲目设置按需展开。 */
-    .landscape.song-mode .practice { height: calc(100vh - 16px); height: calc(100svh - 16px); min-height: 344px; display: flex; flex-direction: column; position: relative; padding: 8px 16px; gap: 3px; }
-    .landscape.song-mode .practice-top { flex: 0 0 44px; height: 44px; margin: 0; }
-    .landscape.song-mode .practice-actions { margin-left: auto; width: auto; }
-    .landscape.song-mode .lesson-details { margin: 0; height: 0; }
-    .landscape.song-mode .lesson-details:not([open]) > summary { position: absolute; top: 13px; left: 16px; max-width: 40%; font-size: 12px; }
-    .landscape.song-mode .lesson-details[open] { position: absolute; top: 52px; left: 16px; right: 16px; height: auto; max-height: calc(100svh - 80px); overflow-y: auto; z-index: 10; padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
-    .landscape.song-mode .staff-wrap { flex: 1; min-height: 94px; position: relative; top: auto; display: flex; flex-direction: column; padding: 0 6px; }
-    .landscape.song-mode #staff { flex: 1; min-height: 0; height: 0; max-height: none; }
-    .landscape.song-mode .staff-caption { font-size: 10px; margin: 0; line-height: 16px; }
-    .landscape.song-mode .phrase-status, .landscape.song-mode .piano-label, .landscape.song-mode .answer-row { display: none; }
-    .landscape.song-mode .feedback { flex: 0 0 26px; min-height: 26px; padding: 3px 8px; margin: 0; font-size: 12px; white-space: nowrap; }
-    .landscape.song-mode #feedbackText { overflow: hidden; text-overflow: ellipsis; }
-    .landscape.song-mode .input-controls { flex: 0 0 40px; margin: 0; gap: 10px; }
-    .landscape.song-mode .keyboard-scroll { flex: 0 0 122px; padding-bottom: 0; }
+    /* 横屏把谱面与琴键放在同一视口，练习设置按需展开。 */
+    .landscape .practice { height: var(--stage-height,calc(100vh - 16px)); min-height: 344px; display: flex; flex-direction: column; position: relative; padding: 8px 16px; gap: 3px; }
+    .landscape .practice-top { flex: 0 0 44px; height: 44px; margin: 0; }
+    .landscape .practice-actions { margin-left: auto; width: auto; }
+    .landscape .lesson-details { margin: 0; height: 0; }
+    .landscape .lesson-details:not([open]) > summary { position: absolute; top: 13px; left: 16px; max-width: 40%; font-size: 12px; }
+    .landscape .lesson-details[open] { position: absolute; top: 52px; left: 16px; right: 16px; height: auto; max-height: calc(100svh - 80px); overflow-y: auto; z-index: 10; padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+    .landscape .staff-wrap { flex: 1; min-height: 94px; position: relative; top: auto; display: flex; flex-direction: column; padding: 0 6px; }
+    .landscape #staff { flex: 1; min-height: 0; height: 0; max-height: none; }
+    .landscape .staff-caption { font-size: 10px; margin: 0; line-height: 16px; }
+    .landscape .phrase-status, .landscape .piano-label, .landscape .answer-row { display: none; }
+    .landscape .feedback { flex: 0 0 26px; min-height: 26px; padding: 3px 8px; margin: 0; font-size: 12px; white-space: nowrap; }
+    .landscape #feedbackText { overflow: hidden; text-overflow: ellipsis; }
+    .landscape .input-controls { flex: 0 0 40px; margin: 0; gap: 10px; }
+    .landscape .keyboard-scroll { flex: 0 0 122px; padding-bottom: 0; }
+
+    /* 竖屏沿用两组八度完整显示；一键横屏在 Safari 中用页面旋转实现。 */
+    body:not(.landscape) .piano-white { min-width: 0; }
+    body:not(.landscape) .piano-black { font-size: 8px; }
+    body.manual-landscape { overflow: hidden; }
+    .manual-landscape .app { position: fixed; top: 0; left: 0; width: 100vh; width: 100dvh; height: 100vw; height: 100dvw; max-width: none; margin: 0; transform-origin: top left; transform: translateX(100vw) rotate(90deg); transform: translateX(100dvw) rotate(90deg); overflow-y: auto; overscroll-behavior: contain; }
+    .manual-landscape .layout { display: grid; grid-template-columns: 1fr; }
+    .manual-landscape .practice-actions { flex-wrap: nowrap; width: auto; }
+    .manual-landscape .practice-actions button { font-size: 12px; white-space: nowrap; padding: 8px; }
+    .manual-landscape .exercise-bar > label, .manual-landscape .song-options, .manual-landscape .song-options label { width: auto; }
+    .manual-landscape .input-mode { width: 220px; max-width: 220px; }
+    .manual-landscape .piano { height: 120px; }
+    .manual-landscape .piano-white { height: 116px; min-width: 46px; }
+    .manual-landscape .piano-black { height: 74px; padding-top: 0; }
+    .manual-landscape .practice-title, .manual-landscape .practice-hint { display: none; }
+
+    .landscape #solfegeKeys { flex: 0 0 100px; }
+    .landscape .keys { gap: 8px; }
+    .landscape .key-btn { min-height: 80px; padding: 8px; }
+    .manual-landscape .lesson-details[open] { max-height: calc(var(--stage-height) - 65px); }
+
+    .landscape .app { padding-left: 8px; padding-right: 8px; }
+    .landscape .practice { padding-left: 8px; padding-right: 8px; }
+    .landscape .piano-white, .manual-landscape .piano-white { min-width: 44px; }
+
   </style>
 </head>
 <body>
@@ -311,6 +336,7 @@
         <div class="practice-top">
           <div><h2 class="practice-title">从一个音，到一段旋律</h2><p class="practice-hint" data-t="portraitHelp"></p></div>
           <div class="practice-actions">
+            <button class="ghost-btn" id="landscapeToggle" type="button" aria-pressed="false" data-t="landscape"></button>
             <button class="ghost-btn" id="focusToggle" type="button" data-t="focus"></button>
             <button class="ghost-btn sound-toggle" id="soundToggle" type="button" aria-pressed="true" data-t="soundOn"></button>
             <button class="ghost-btn" id="newQuestion" type="button" data-t="next"></button>
@@ -376,7 +402,7 @@
     </div>
   </main>
 
-  <script>
+<script>
     // 所有新增界面文案集中维护；这是独立 HTML，不使用 E10 平台标签 ID。
     const T = {
       practice: '练习方式', random: '随机识音', patterns: '旋律片段', review: '弱项复习', songs: '入门短曲',
@@ -384,7 +410,8 @@
       songHelp: 'C 大调单声部短曲。按起音节奏点击；长音等够拍数再弹下一音，暂不评估按住琴键的时长。',
       style: '练习节奏', learn: '慢慢认音', rhythm: '跟拍练习', tempo: '速度（每分钟拍数）', demo: '♫ 听示范', start: '▶ 开始跟拍', stop: '■ 停止',
       labels: '显示琴键名称', highlight: '高亮当前音符', focus: '⛶ 专注布局', exitFocus: '退出专注',
-      portraitHelp: '转动手机可使用横屏布局；琴键保持大小，必要时可左右滑动。',
+      portraitHelp: '点击“横屏”可直接切换横向练习；竖屏完整显示两组八度琴键。',
+      landscape: '横屏', exitLandscape: '退出横屏', landscapeOn: '已横屏',
       weakTitle: '我的薄弱音', weakEmpty: '先完成一些练习。这里会记录首次答题的正确率和反应时间，并在弱项复习中多练不熟悉的音。',
       firstAccuracy: '首次正确率', counted: '已练音符', today: '本次目标 20 音', soundOn: '🔊 音效 开', soundOff: '🔇 音效 关',
       next: '换一组 ↻', replay: '重练本曲 ↻', reveal: '提示当前音（记为未独立答对）', settings: '练习设置',
@@ -436,7 +463,7 @@
     const state = {
       clef:'treble', range:'basic', mode:'piano', exercise:'random', song:'twinkle', pacing:'learn', sequenceLength:4,
       sequence:[], position:0, streak:0, best:0, correct:0, answered:0, soundEnabled:true,
-      labels:true, highlight:true, finished:false, running:null, startedAt:Date.now(), noteStarted:performance.now(),
+      labels:true, highlight:true, manualLandscape:false, finished:false, running:null, startedAt:Date.now(), noteStarted:performance.now(),
     };
     let audioContext = null, nextTimer = null, frame = null, runSerial = 0;
     let scheduledVoices = [];
@@ -518,14 +545,14 @@
     }
     function drawStaff() {
       const {width,capacity,start,end} = visibleWindow();
-      const dual = state.exercise !== 'songs';
-      const compact=landscape.matches;
+      const compact=landscape.matches||state.manualLandscape;
+      const dual = state.exercise !== 'songs' && (!compact || state.clef === 'mixed');
       const height = dual ? (compact?208:316) : (compact?90:192);
-      const bottoms = compact ? {treble:dual?74:52,bass:172} : {treble:112,bass:258};
+      const bottoms = compact ? {treble:dual?74:52,bass:dual?172:52} : {treble:112,bass:258};
       const left = 60, right = width - 13, gap = compact?(dual?10:8):14, stepUnit = gap/2;
       const radius=compact?7.5:10, stemLength=compact?28:39;
       svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
-      const activeClefs = dual ? ['treble','bass'] : ['treble'];
+      const activeClefs = dual ? ['treble','bass'] : [state.exercise === 'songs' ? 'treble' : state.clef];
       const staff = activeClefs.map(clef => {
         const bottom = bottoms[clef];
         const lines = Array.from({length:5},(_,i) => `<line x1="${left}" y1="${bottom-i*gap}" x2="${right}" y2="${bottom-i*gap}" class="staff-line"/>`).join('');
@@ -693,11 +720,12 @@
       const width=$('keyboardScroll').clientWidth;
       const activeClef=currentNote().clef;
       let first=activeClef==='bass'?2:4, last=first+1;
-      if(state.exercise==='songs') {first=4;last=width>=14*46?5:4;}
+      if(state.exercise==='songs') {first=4;last=5;}
       else if(width>=21*46)last=first+2;
       if(state.clef==='mixed' && state.exercise!=='songs' && width>=28*46){first=2;last=5;}
       const whiteCount=(last-first+1)*7;
-      const keyWidth=Math.max(46,Math.min(70,width/whiteCount));
+      const wide=landscape.matches||state.manualLandscape||width>=700;
+      const keyWidth=wide?Math.max(44,Math.min(70,width/whiteCount)):width/whiteCount;
       const oldScroll=$('keyboardScroll').scrollLeft;
       piano.style.width=`${whiteCount*keyWidth}px`;piano.innerHTML='';
       const names=[['C',false],['C♯',true],['D',false],['D♯',true],['E',false],['F',false],['F♯',true],['G',false],['G♯',true],['A',false],['A♯',true],['B',false]];
@@ -721,10 +749,16 @@
       $('startRhythm').classList.toggle('hidden',state.pacing!=='rhythm');chooseQuestion();
     }
     function applyLayout() {
-      const compact=landscape.matches||document.body.classList.contains('focus-mode');
+      if(landscape.matches)state.manualLandscape=false;
+      const compact=landscape.matches||state.manualLandscape||document.body.classList.contains('focus-mode');
       $('settingsDetails').open=!compact;
       $('lessonDetails').open=!compact;
-      document.body.classList.toggle('landscape',landscape.matches);
+      document.body.classList.toggle('landscape',landscape.matches||state.manualLandscape);
+      document.body.classList.toggle('manual-landscape',state.manualLandscape);
+      document.body.style.setProperty('--stage-height',`${(state.manualLandscape?window.innerWidth:window.innerHeight)-16}px`);
+      $('landscapeToggle').textContent=state.manualLandscape?T.exitLandscape:landscape.matches?T.landscapeOn:T.landscape;
+      $('landscapeToggle').disabled=landscape.matches;
+      $('landscapeToggle').setAttribute('aria-pressed',String(state.manualLandscape||landscape.matches));
       if(state.sequence.length){drawStaff();renderPiano();}
     }
     $('exercise').addEventListener('change',()=>{state.exercise=$('exercise').value;chooseQuestion();});
@@ -738,6 +772,8 @@
     $('soundToggle').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;$('soundToggle').textContent=state.soundEnabled?T.soundOn:T.soundOff;$('soundToggle').setAttribute('aria-pressed',String(state.soundEnabled));if(!state.soundEnabled&&state.running)chooseQuestion();});
     $('labelsToggle').addEventListener('change',()=>{state.labels=$('labelsToggle').checked;renderPiano();});
     $('highlightToggle').addEventListener('change',()=>{state.highlight=$('highlightToggle').checked;drawStaff();});
+    $('landscapeToggle').addEventListener('click',()=>{state.manualLandscape=!state.manualLandscape;applyLayout();});
+    window.addEventListener('resize',applyLayout);
     $('focusToggle').addEventListener('click',()=>{document.body.classList.toggle('focus-mode');$('focusToggle').textContent=document.body.classList.contains('focus-mode')?T.exitFocus:T.focus;applyLayout();});
     $('showAnswer').addEventListener('click',()=>{if(state.finished||state.running)return;recordFirst(currentNote(),false);setFeedback('ready','◌',T.hint(currentNote().pitch+'（'+currentNote().answer+'）'));});
     document.querySelectorAll('.key-btn').forEach(button=>button.addEventListener('click',()=>answer(button.dataset.answer,false)));
@@ -758,6 +794,7 @@
     document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.running)chooseQuestion();});
     chooseQuestion();updateStats();applyLayout();
     setInterval(()=>{const s=Math.floor((Date.now()-state.startedAt)/1000);$('timer').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;},1000);
-  </script>
+
+</script>
 </body>
 </html>
