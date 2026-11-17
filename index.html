@@ -189,51 +189,162 @@
       .piano-white { height: 127px; padding-bottom: 7px; font-size: 9px; }
       .piano-black { height: 78px; padding-top: 57px; font-size: 8px; }
     }
+      /* 琴键宽度以可点击尺寸为下限；窄屏滚动，横屏扩展，谱面分页保持可读。 */
+    button, select, input { font: inherit; }
+    button { touch-action: manipulation; }
+    select { color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 10px; min-height: 44px; padding: 8px 12px; max-width: 100%; }
+    input[type="checkbox"], input[type="range"] { accent-color: var(--blue); }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+    .app { max-width: 1440px; padding-top: 24px; }
+    .layout { grid-template-columns: minmax(0,1fr) 280px; }
+    .practice { min-width: 0; padding: 22px; }
+    .practice-top { flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+    .practice-actions { flex-wrap: wrap; flex-shrink: 1; }
+    .ghost-btn { min-height: 44px; }
+    .exercise-bar, .song-options { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+    .exercise-bar { padding: 12px; border-radius: 13px; background: var(--surface); margin-bottom: 12px; }
+    .exercise-bar label { display: grid; gap: 5px; font-size: 12px; color: var(--muted); }
+    .song-options { flex: 1; }
+    .song-options label:first-child { flex: 1; }
+    .rhythm-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .tempo { color: var(--muted); font-size: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .tempo input { width: 115px; min-height: 32px; }
+    .song-help { flex-basis: 100%; color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0; }
+    .beat-pulse { border: 1px solid var(--line); border-radius: 50%; width: 32px; height: 32px; display: grid; place-items: center; color: var(--blue); }
+    .beat-pulse.pulse-on { background: var(--blue-soft); border-color: var(--blue); }
+    .staff-wrap { padding: 4px 8px 8px; }
+    #staff { max-height: 316px; }
+    .staff-caption { line-height: 1.6; }
+    .phrase-status { display: flex; gap: 10px; align-items: center; margin-top: 8px; font-size: 11px; color: var(--muted); }
+    .phrase-track { flex: 1; height: 4px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+    #phraseFill { height: 100%; background: var(--mint); }
+    .feedback { min-height: 44px; margin: 10px 0; padding: 9px 12px; font-size: 13px; }
+    .input-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 10px 0; }
+    .input-mode { width: 220px; margin: 0; }
+    .segmented button { min-height: 40px; }
+    .check-label { display: flex; gap: 6px; align-items: center; min-height: 40px; font-size: 12px; color: var(--muted); cursor: pointer; }
+    .check-label input { width: 17px; height: 17px; }
+    .keyboard-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; padding: 2px 0 6px; }
+    .piano { height: 156px; padding: 0; overflow: visible; border-bottom: 0; }
+    .piano-white { height: 150px; flex: 0 0 auto; min-width: 46px; font-size: 11px; font-family: inherit; font-weight: 600; }
+    .piano-black { height: 94px; padding: 0 0 7px; display: flex; align-items: flex-end; justify-content: center; font-size: 9px; font-family: inherit; }
+    .piano-white.pressed { background: var(--selection); color: var(--ink); }
+    .piano-black.pressed { background: #536fe7; }
+    .piano-label { line-height: 1.6; }
+    details summary { cursor: pointer; font-size: 15px; font-weight: 700; min-height: 28px; }
+    details[open] summary { margin-bottom: 15px; }
+    #weakNotes p { padding: 6px 0; margin: 0; border-bottom: 1px solid var(--line); }
+    .focus-mode .layout, .landscape .layout { grid-template-columns: 1fr; }
+    .focus-mode .hero, .focus-mode .stats, .landscape .hero, .landscape .stats { display: none; }
+    .focus-mode aside, .landscape aside { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; }
+    .focus-mode .side + .side, .landscape .side + .side { margin-top: 0; }
+    .focus-mode .app, .landscape .app { padding: max(8px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left)); }
+    .landscape .practice { padding: 12px 16px; }
+    .landscape .practice-title { font-size: 15px; }
+    .landscape .practice-hint, .landscape .song-help { display: none; }
+    .landscape .practice-top { margin-bottom: 8px; }
+    .landscape .exercise-bar { padding: 7px 10px; margin-bottom: 7px; }
+    .landscape .exercise-bar label { display: flex; align-items: center; }
+    .landscape .feedback { min-height: 35px; margin: 5px 0; }
+    .landscape .input-controls { margin: 5px 0; }
+    .landscape .piano { height: 120px; }
+    .landscape .piano-white { height: 116px; }
+    .landscape .piano-black { height: 74px; }
+    .landscape #staff { max-height: 205px; }
+    @media(max-width:1000px) { .layout { grid-template-columns: 1fr; } }
+    @media(max-width:500px) {
+      .practice { padding: 14px 12px; }
+      .practice-actions { width: 100%; justify-content: space-between; gap: 5px; }
+      .practice-actions button { font-size: 12px; padding: 8px; }
+      .exercise-bar > label, .song-options, .song-options label { width: 100%; }
+      .exercise-bar select { width: 100%; }
+      .song-options label { flex: auto; }
+      .piano-white { min-width: 46px; height: 142px; font-size: 11px; }
+      .piano-black { height: 89px; padding-top: 0; }
+      .piano { height: 148px; }
+      .input-mode { width: 100%; max-width: none; }
+    }
+
+    .lesson-details { margin-bottom: 10px; }
+    .lesson-details > summary { color: var(--muted); font-size: 12px; min-height: 32px; padding: 7px 0; }
+    .lesson-details[open] > summary { margin-bottom: 6px; }
+    .landscape .practice-top > div:first-child { display: none; }
+    .landscape .practice-actions { width: 100%; justify-content: flex-end; }
+    .landscape .staff-wrap { position: sticky; top: 0; z-index: 3; }
+    .landscape #staff { max-height: 208px; }
+
+    /* 手机横屏短曲把谱面与琴键放在同一视口，曲目设置按需展开。 */
+    .landscape.song-mode .practice { height: calc(100vh - 16px); height: calc(100svh - 16px); min-height: 344px; display: flex; flex-direction: column; position: relative; padding: 8px 16px; gap: 3px; }
+    .landscape.song-mode .practice-top { flex: 0 0 44px; height: 44px; margin: 0; }
+    .landscape.song-mode .practice-actions { margin-left: auto; width: auto; }
+    .landscape.song-mode .lesson-details { margin: 0; height: 0; }
+    .landscape.song-mode .lesson-details:not([open]) > summary { position: absolute; top: 13px; left: 16px; max-width: 40%; font-size: 12px; }
+    .landscape.song-mode .lesson-details[open] { position: absolute; top: 52px; left: 16px; right: 16px; height: auto; max-height: calc(100svh - 80px); overflow-y: auto; z-index: 10; padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+    .landscape.song-mode .staff-wrap { flex: 1; min-height: 94px; position: relative; top: auto; display: flex; flex-direction: column; padding: 0 6px; }
+    .landscape.song-mode #staff { flex: 1; min-height: 0; height: 0; max-height: none; }
+    .landscape.song-mode .staff-caption { font-size: 10px; margin: 0; line-height: 16px; }
+    .landscape.song-mode .phrase-status, .landscape.song-mode .piano-label, .landscape.song-mode .answer-row { display: none; }
+    .landscape.song-mode .feedback { flex: 0 0 26px; min-height: 26px; padding: 3px 8px; margin: 0; font-size: 12px; white-space: nowrap; }
+    .landscape.song-mode #feedbackText { overflow: hidden; text-overflow: ellipsis; }
+    .landscape.song-mode .input-controls { flex: 0 0 40px; margin: 0; gap: 10px; }
+    .landscape.song-mode .keyboard-scroll { flex: 0 0 122px; padding-bottom: 0; }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="hero">
       <div>
-        <div class="eyebrow">Sight-reading practice</div>
+        <div class="eyebrow">Sight-reading practice · 练习版 2</div>
         <h1>五线谱 · 识音训练</h1>
-        <p class="subtitle">看清音符的位置，凭记忆按下对应的唱名。每次只练一个小目标，先准确，再逐渐加快。</p>
+        <p class="subtitle">先认准一个音，再连成一句旋律。每天一点，慢慢读得流畅。</p>
       </div>
       <div class="session-chip">本次练习 <strong id="timer">00:00</strong></div>
     </header>
-
     <section class="stats" aria-label="练习统计">
       <div class="stat"><div class="stat-label">当前连对</div><div class="stat-value" id="streak">0</div></div>
-      <div class="stat"><div class="stat-label">正确率</div><div class="stat-value" id="accuracy">—</div></div>
-      <div class="stat"><div class="stat-label">已答音符</div><div class="stat-value" id="answered">0</div></div>
+      <div class="stat"><div class="stat-label" data-t="firstAccuracy"></div><div class="stat-value" id="accuracy">—</div></div>
+      <div class="stat"><div class="stat-label" data-t="counted"></div><div class="stat-value" id="answered">0</div></div>
       <div class="stat"><div class="stat-label">最佳连对</div><div class="stat-value" id="best">0</div></div>
     </section>
-
     <div class="layout">
       <section class="card practice">
         <div class="practice-top">
-          <div>
-            <h2 class="practice-title">这是什么音？</h2>
-            <p class="practice-hint">从左到右识别音符，按顺序用钢琴键或 1–7 唱名作答。</p>
-          </div>
+          <div><h2 class="practice-title">从一个音，到一段旋律</h2><p class="practice-hint" data-t="portraitHelp"></p></div>
           <div class="practice-actions">
-            <button class="ghost-btn" id="soundToggle" type="button">🔊 音效 开</button>
-            <button class="ghost-btn" id="newQuestion" type="button">换一个 ↻</button>
+            <button class="ghost-btn" id="focusToggle" type="button" data-t="focus"></button>
+            <button class="ghost-btn sound-toggle" id="soundToggle" type="button" aria-pressed="true" data-t="soundOn"></button>
+            <button class="ghost-btn" id="newQuestion" type="button" data-t="next"></button>
           </div>
         </div>
-
-        <div class="staff-wrap">
-          <svg id="staff" viewBox="0 0 700 410" role="img" aria-label="高低音双谱表练习，蓝圈标记当前音符"></svg>
-          <div class="staff-caption" id="staffCaption">高音谱号 · 自然音</div>
+        <details id="lessonDetails" class="lesson-details" open><summary>练习方式、曲目与速度</summary>
+        <div class="exercise-bar">
+          <label><span data-t="practice"></span><select id="exercise"><option value="random" data-t="random"></option><option value="patterns" data-t="patterns"></option><option value="review" data-t="review"></option><option value="songs" data-t="songs"></option></select></label>
+          <div class="song-options hidden" id="songOptions">
+            <label><span data-t="song"></span><select id="song"><option value="twinkle" data-t="twinkle"></option><option value="ode" data-t="ode"></option><option value="brother" data-t="brother"></option></select></label>
+            <label><span data-t="style"></span><select id="pacing"><option value="learn" data-t="learn"></option><option value="rhythm" data-t="rhythm"></option></select></label>
+          </div>
         </div>
-
-        <div id="feedback" class="feedback ready" aria-live="polite"><span class="mark">✦</span><span>准备好了吗？先观察音符落在第几线或第几个间。</span></div>
-        <div class="segmented input-mode" id="inputMode" aria-label="输入方式">
-          <button class="active" data-mode="piano" type="button">🎹 钢琴键</button>
-          <button data-mode="solfege" type="button">1–7 唱名</button>
+        <div class="rhythm-controls hidden" id="rhythmControls">
+          <label class="tempo"><span data-t="tempo"></span> <strong id="tempoValue">60</strong><input id="tempo" type="range" min="40" max="120" step="5" value="60"></label>
+          <button class="ghost-btn" id="demo" type="button" data-t="demo"></button>
+          <button class="ghost-btn hidden" id="startRhythm" type="button" data-t="start"></button>
+          <span class="beat-pulse" id="beatPulse" aria-label="当前拍数">♩</span>
+          <p class="song-help" data-t="songHelp"></p>
         </div>
-        <div id="piano" class="piano" aria-label="钢琴键盘"></div>
-        <div class="piano-label" id="pianoLabel">点击琴键作答，当前音答对后会自动进入下一个音</div>
+        </details>
+        <div class="staff-wrap" id="staffWrap">
+          <svg id="staff" role="img" aria-label="五线谱练习，按谱面从左到右作答"></svg>
+          <div class="staff-caption" id="staffCaption"></div>
+        </div>
+        <div class="phrase-status"><div class="phrase-track"><div id="phraseFill"></div></div><span id="phraseProgress"></span></div>
+        <div id="feedback" class="feedback ready" aria-live="polite"><span class="mark" id="feedbackMark">✦</span><span id="feedbackText"></span></div>
+        <div class="input-controls">
+          <div class="segmented input-mode" id="inputMode" aria-label="输入方式"><button class="active" data-mode="piano" type="button" data-t="showKeys"></button><button data-mode="solfege" type="button" data-t="showNumbers"></button></div>
+          <label class="check-label"><input type="checkbox" id="labelsToggle" checked><span data-t="labels"></span></label>
+          <label class="check-label"><input type="checkbox" id="highlightToggle" checked><span data-t="highlight"></span></label>
+        </div>
+        <div class="keyboard-scroll" id="keyboardScroll"><div id="piano" class="piano" aria-label="钢琴键盘"></div></div>
+        <div class="piano-label" id="pianoLabel"></div>
         <div class="keys hidden" id="solfegeKeys" aria-label="唱名选项">
           <button class="key-btn" data-answer="1" type="button"><span class="key-num">1</span><span class="key-name">Do · 哆</span></button>
           <button class="key-btn" data-answer="2" type="button"><span class="key-num">2</span><span class="key-name">Re · 来</span></button>
@@ -243,361 +354,410 @@
           <button class="key-btn" data-answer="6" type="button"><span class="key-num">6</span><span class="key-name">La · 拉</span></button>
           <button class="key-btn" data-answer="7" type="button"><span class="key-num">7</span><span class="key-name">Si · 西</span></button>
         </div>
-        <div class="answer-row"><button class="answer-btn" id="showAnswer" type="button">看答案（本题不计分）</button></div>
+        <div class="answer-row"><button class="answer-btn" id="showAnswer" type="button" data-t="reveal"></button></div>
       </section>
-
       <aside>
-        <section class="card side">
-          <h2>练习设置</h2>
-          <div class="field">
-            <span class="field-label">练习模式</span>
-            <div class="segmented clef-selector" id="clefSelector">
-              <button class="active" data-clef="treble" type="button">高音谱号</button>
-              <button data-clef="bass" type="button">低音谱号</button>
-              <button data-clef="mixed" type="button">先低后高</button>
-            </div>
-            <p class="field-help" id="clefHelp">始终显示高低音双谱表，当前练习高音。</p>
-          </div>
-          <div class="field">
-            <span class="field-label">一题几个音</span>
-            <div class="segmented length-selector" id="lengthSelector" aria-label="一题几个音">
-              <button class="active" data-length="1" type="button">1</button>
-              <button data-length="2" type="button">2</button>
-              <button data-length="3" type="button">3</button>
-              <button data-length="4" type="button">4</button>
-              <button data-length="5" type="button">5</button>
-              <button data-length="6" type="button">6</button>
-            </div>
-          </div>
-          <div class="field">
-            <span class="field-label">难度范围</span>
-            <div class="range-grid">
+        <details class="card side" id="settingsDetails" open>
+          <summary data-t="settings"></summary>
+          <div id="randomOptions">
+            <div class="field"><span class="field-label" data-t="clef"></span><div class="segmented clef-selector" id="clefSelector"><button class="active" data-clef="treble" type="button">高音谱号</button><button data-clef="bass" type="button">低音谱号</button><button data-clef="mixed" type="button">先低后高</button></div><p class="field-help" id="clefHelp"></p></div>
+            <div class="field"><label class="field-label" for="length" data-t="notes"></label><select id="length"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option><option>12</option></select></div>
+            <div class="field"><span class="field-label" data-t="range"></span><div class="range-grid">
               <div class="range-option"><input checked type="radio" name="range" id="range-basic" value="basic"><label for="range-basic"><span>入门 · 五线内</span>只练谱表里的线与间</label></div>
-              <div class="range-option"><input type="radio" name="range" id="range-extend" value="extend"><label for="range-extend"><span>进阶 · 加下加线</span>加入上下方的常用音</label></div>
+              <div class="range-option"><input type="radio" name="range" id="range-extend" value="extend"><label for="range-extend"><span>进阶 · 常用加线</span>加入上下方的常用音</label></div>
               <div class="range-option"><input type="radio" name="range" id="range-mix" value="mix"><label for="range-mix"><span>综合 · 全部</span>混合当前谱号的练习范围</label></div>
-            </div>
+            </div></div>
           </div>
-          <div class="progress" aria-label="今日练习进度"><div id="progressBar"></div></div>
-          <div class="progress-row"><span>今日目标 20 题</span><span id="progressText">0 / 20</span></div>
-        </section>
-
-        <section class="card side">
-          <h2>一个小技巧</h2>
-          <div class="tip"><strong>不要数线。</strong>先记住几个“地标音”：高音谱号第二线是 Sol，低音谱号第四线是 Fa。熟悉后，其他音会变成相邻的位置关系。</div>
-        </section>
+          <div class="progress"><div id="progressBar"></div></div><div class="progress-row"><span data-t="today"></span><span id="progressText">0 / 20</span></div>
+        </details>
+        <section class="card side"><h2 data-t="weakTitle"></h2><div class="field-help" id="weakNotes"></div><p class="field-help" data-t="storedLocal"></p></section>
+        <section class="card side"><h2>一个小技巧</h2><div class="tip"><strong>先看走向，再认每个音。</strong>相邻、重复、跳进都可以组成旋律；熟悉后，试试隐藏琴键名称。跟拍时保持节奏，结束后再回顾错音。</div></section>
       </aside>
     </div>
   </main>
 
   <script>
-    const solfege = { C: '1', D: '2', E: '3', F: '4', G: '5', A: '6', B: '7' };
-    const clefs = {
-      treble: {
-        name: '高音谱号',
-        // E4 is the bottom staff line. Values are diatonic steps from E4.
-        notes: [
-          ['C', 4, -2], ['D', 4, -1], ['E', 4, 0], ['F', 4, 1], ['G', 4, 2], ['A', 4, 3], ['B', 4, 4],
-          ['C', 5, 5], ['D', 5, 6], ['E', 5, 7], ['F', 5, 8], ['G', 5, 9], ['A', 5, 10], ['B', 5, 11]
-        ],
-        anchor: 'E4'
-      },
-      bass: {
-        name: '低音谱号',
-        // G2 is the bottom staff line.
-        notes: [
-          ['C', 2, -4], ['D', 2, -3], ['E', 2, -2], ['F', 2, -1], ['G', 2, 0], ['A', 2, 1], ['B', 2, 2],
-          ['C', 3, 3], ['D', 3, 4], ['E', 3, 5], ['F', 3, 6], ['G', 3, 7], ['A', 3, 8], ['B', 3, 9]
-        ],
-        anchor: 'G2'
-      }
+    // 所有新增界面文案集中维护；这是独立 HTML，不使用 E10 平台标签 ID。
+    const T = {
+      practice: '练习方式', random: '随机识音', patterns: '旋律片段', review: '弱项复习', songs: '入门短曲',
+      song: '选择短曲', twinkle: '小星星 · 开头四小节', ode: '欢乐颂 · 开头四小节', brother: '两只老虎 · 开头四小节',
+      songHelp: 'C 大调单声部短曲。按起音节奏点击；长音等够拍数再弹下一音，暂不评估按住琴键的时长。',
+      style: '练习节奏', learn: '慢慢认音', rhythm: '跟拍练习', tempo: '速度（每分钟拍数）', demo: '♫ 听示范', start: '▶ 开始跟拍', stop: '■ 停止',
+      labels: '显示琴键名称', highlight: '高亮当前音符', focus: '⛶ 专注布局', exitFocus: '退出专注',
+      portraitHelp: '转动手机可使用横屏布局；琴键保持大小，必要时可左右滑动。',
+      weakTitle: '我的薄弱音', weakEmpty: '先完成一些练习。这里会记录首次答题的正确率和反应时间，并在弱项复习中多练不熟悉的音。',
+      firstAccuracy: '首次正确率', counted: '已练音符', today: '本次目标 20 音', soundOn: '🔊 音效 开', soundOff: '🔇 音效 关',
+      next: '换一组 ↻', replay: '重练本曲 ↻', reveal: '提示当前音（记为未独立答对）', settings: '练习设置',
+      notes: '一组几个音', singleHelp: '高低音双谱表；跟随当前练习的谱号读谱。', mixedHelp: '先低音、后高音；宽屏可同时显示更宽的键盘。',
+      countIn: n => `预备：${n} / 4 拍，准备从第一个音开始。`,
+      ready: n => `共 ${n} 个音，从左到右作答。答错可以纠正，首次回答计入统计。`,
+      songReady: n => `共 ${n} 个音，先听示范，再慢慢弹；也可以切换“跟拍练习”。`,
+      waitStart: '点击“开始跟拍”，听完四拍预备后开始。', demoPlaying: '正在示范：听每个音的长短，跟着蓝圈读谱。',
+      silentDemo: '音效已关闭，请先开启音效再听示范。', audioFailed: '浏览器未能启动声音，请再点击一次；认音练习仍然可用。',
+      black: '当前练习是自然音。黑键可以发声，但不计分；请找对应白键。',
+      early: '稍早了，听节拍，等蓝圈到达下一个音再按。',
+      wrong: (n, label) => `第 ${n} 个音是 ${label}，再试一次。`,
+      octave: (label, pitch) => `唱名相同，八度不同：谱上是 ${label}，你按了 ${pitch}。`,
+      continue: (n,total) => `答对了，继续第 ${n} / ${total} 个音。`,
+      done: '这一组完成！马上生成下一组。', songDone: '这首短曲完成！可以再弹一遍，或切换跟拍练习。',
+      summary: (right, miss, total) => `本曲结束：${total} 个音中首次按准 ${right} 个，漏过 ${miss} 个。可慢一点再练一次。`,
+      hint: label => `当前音是 ${label}。记住谱上位置，再按对应键继续。`,
+      rhythmHelp: '跟拍模式按节拍前进，错音不会暂停；慢慢认音模式可随时纠正。',
+      caption: (clef,n,total,page,pages) => `${clef} · 第 ${n} / ${total} 音 · 谱面 ${page} / ${pages}`,
+      piano: (first,last,scroll) => `${first}–${last} · ${scroll ? '左右滑动琴键 · ' : ''}中央 C 为 C4`,
+      weakRow: (pitch,accuracy,seconds) => `${pitch} · 首次正确 ${accuracy}% · 平均 ${seconds} 秒`,
+      storedLocal: '仅保存在当前设备浏览器；清除浏览器数据后会重置。',
+      scoreLabel: n => `第 ${n} 个音`, rhythmNow: n => `跟拍中 · 第 ${n} 个音`, missedNote: n => `第 ${n} 个音漏过了，保持节拍继续。`,
+      showKeys: '🎹 钢琴键', showNumbers: '1–7 唱名', range: '难度范围', clef: '谱号',
     };
-
-    const state = { clef: 'treble', range: 'basic', mode: 'piano', sequenceLength: 1, sequence: [], position: 0, current: null, streak: 0, best: 0, correct: 0, answered: 0, revealed: false, soundEnabled: true, startedAt: Date.now() };
-    let audioContext = null;
-    const svg = document.getElementById('staff');
-    const feedback = document.getElementById('feedback');
-    const staffCaption = document.getElementById('staffCaption');
-    const piano = document.getElementById('piano');
-    const pianoLabel = document.getElementById('pianoLabel');
-
+    const solfege = { C:'1', D:'2', E:'3', F:'4', G:'5', A:'6', B:'7' };
+    const clefNames = { treble:'高音谱号', bass:'低音谱号', mixed:'先低后高' };
+    const clefs = {
+      treble: [['C',4,-2],['D',4,-1],['E',4,0],['F',4,1],['G',4,2],['A',4,3],['B',4,4],['C',5,5],['D',5,6],['E',5,7],['F',5,8],['G',5,9],['A',5,10],['B',5,11]],
+      bass: [['C',2,-4],['D',2,-3],['E',2,-2],['F',2,-1],['G',2,0],['A',2,1],['B',2,2],['C',3,3],['D',3,4],['E',3,5],['F',3,6],['G',3,7],['A',3,8],['B',3,9]],
+    };
+    // 传统旋律／公版作品的简化开头，只使用单声部自然音，4/4 拍。
+    const SONGS = {
+      twinkle: [['C4',1],['C4',1],['G4',1],['G4',1],['A4',1],['A4',1],['G4',2],['F4',1],['F4',1],['E4',1],['E4',1],['D4',1],['D4',1],['C4',2]],
+      ode: [['E4',1],['E4',1],['F4',1],['G4',1],['G4',1],['F4',1],['E4',1],['D4',1],['C4',1],['C4',1],['D4',1],['E4',1],['E4',1.5],['D4',.5],['D4',2]],
+      brother: [['C4',1],['D4',1],['E4',1],['C4',1],['C4',1],['D4',1],['E4',1],['C4',1],['E4',1],['F4',1],['G4',2],['E4',1],['F4',1],['G4',2]],
+    };
+    const $ = id => document.getElementById(id);
+    document.querySelectorAll('[data-t]').forEach(el => { el.textContent = T[el.dataset.t]; });
+    let mastery = {};
+    try {
+      const saved = JSON.parse(localStorage.getItem('staff-mastery-v2') || '{}');
+      if (saved && typeof saved === 'object') {
+        Object.entries(saved).forEach(([key, v]) => {
+          if (/^(treble|bass):[A-G][2-5]$/.test(key) && v && [v.seen,v.correct,v.totalMs].every(Number.isFinite) && v.seen > 0 && v.correct >= 0 && v.correct <= v.seen && v.totalMs >= 0) mastery[key] = v;
+        });
+      }
+    } catch (_) { /* 浏览器禁用存储时保留当前会话练习。 */ }
+    const state = {
+      clef:'treble', range:'basic', mode:'piano', exercise:'random', song:'twinkle', pacing:'learn', sequenceLength:4,
+      sequence:[], position:0, streak:0, best:0, correct:0, answered:0, soundEnabled:true,
+      labels:true, highlight:true, finished:false, running:null, startedAt:Date.now(), noteStarted:performance.now(),
+    };
+    let audioContext = null, nextTimer = null, frame = null, runSerial = 0;
+    let scheduledVoices = [];
+    const svg = $('staff'), piano = $('piano');
+    const landscape = window.matchMedia('(orientation: landscape) and (max-height: 650px)');
+    function currentNote() { return state.sequence[state.position]; }
+    function noteToMidi(letter, octave) { return ({ C:0,D:2,E:4,F:5,G:7,A:9,B:11 }[letter]) + (octave + 1) * 12; }
+    function pitchToMidi(pitch) { return noteToMidi(pitch[0], Number(pitch.match(/\d+$/)[0])) + (pitch.includes('♯') ? 1 : 0); }
+    function makeNote(pitch, clef, beats = 1) {
+      const row = clefs[clef].find(n => n[0] + n[1] === pitch);
+      if (!row) throw new Error('音符超出练习范围');
+      return { pitch, clef, letter:row[0], octave:row[1], step:row[2], answer:solfege[row[0]], beats, status:'pending', firstAttempted:false };
+    }
     function getPool(clef) {
-      const notes = clefs[clef].notes;
-      if (state.range === 'basic') return clef === 'treble' ? notes.slice(2, 11) : notes.slice(4, 13); // only the five-line staff
-      if (state.range === 'extend') return notes.slice(0, 13);
-      return notes;
+      const pool = clefs[clef];
+      if (state.range === 'basic') return clef === 'treble' ? pool.slice(2,11) : pool.slice(4,13);
+      return state.range === 'extend' ? pool.slice(0,13) : pool;
     }
-
-    function drawStaff(notes) {
-      const gap = 18, left = 90, right = 650;
-      const bottoms = { treble: 142, bass: 330 };
-      const stepUnit = gap / 2;
-      const staffMarkup = ['treble', 'bass'].map(clef => {
-        const bottom = bottoms[clef];
-        const lines = Array.from({ length: 5 }, (_, i) => `<line x1="${left}" y1="${bottom - i * gap}" x2="${right}" y2="${bottom - i * gap}" class="staff-line"/>`).join('');
-        const symbol = clef === 'treble' ? '𝄞' : '𝄢';
-        return `<g data-staff="${clef}">${lines}<text x="74" y="${clef === 'treble' ? bottom + 9 : bottom - 9}" font-size="84" font-family="Times New Roman, Noto Serif, serif" fill="var(--note-ink)">${symbol}</text></g>`;
-      }).join('');
-      const noteXs = notes.length === 1 ? [430] : notes.map((_, index) => 190 + index * (430 / (notes.length - 1)));
-      const noteMarkup = notes.map((note, index) => {
-        const bottom = bottoms[note.clef];
-        const x = noteXs[index];
-        const y = bottom - note.step * stepUnit;
-        const stemUp = note.step <= 4;
-        const stemX = stemUp ? x + 13 : x - 13;
-        const stemY2 = stemUp ? y - 54 : y + 54;
-        const ledger = [];
-        const ledgerX1 = x - 25, ledgerX2 = x + 25;
-        if (note.step < 0) for (let s = -2; s >= note.step; s -= 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
-        if (note.step > 8) for (let s = 10; s <= note.step; s += 2) ledger.push(`<line x1="${ledgerX1}" y1="${bottom - s * stepUnit}" x2="${ledgerX2}" y2="${bottom - s * stepUnit}" class="ledger-line"/>`);
-        const active = index === state.position ? `<circle cx="${x}" cy="${y}" r="24" class="active-note"/>` : '';
-        const head = `<ellipse cx="${x}" cy="${y}" rx="15" ry="10" transform="rotate(-18 ${x} ${y})" class="note-head"/>`;
-        const stem = `<line x1="${stemX}" y1="${y - (stemUp ? 3 : -3)}" x2="${stemX}" y2="${stemY2}" class="note-stem"/>`;
-        return `<g data-note-clef="${note.clef}" data-note-index="${index}">${active}${ledger.join('')}${head}${stem}</g>`;
-      }).join('');
-      svg.innerHTML = `<style>
-        .staff-line, .ledger-line { stroke: var(--staff-line); stroke-width: 1.6; }
-        .active-note { fill: var(--blue-soft); stroke: var(--selection); stroke-width: 1.5; }
-        .note-head { fill: var(--note-ink); }
-        .note-stem { stroke: var(--note-ink); stroke-width: 3; stroke-linecap: round; }
-      </style>
-      <rect x="0" y="0" width="700" height="410" fill="var(--staff-paper)"/>
-      ${staffMarkup}
-      <path d="M 66 70 H 58 V 330 H 66 M 90 70 V 330 M 650 70 V 330" fill="none" stroke="var(--staff-line)" stroke-width="1.6"/>
-      <g>${noteMarkup}</g>`;
-    }
-
-    function chooseQuestion() {
-      const count = state.sequenceLength;
-      const bassCount = Math.ceil(count / 2);
-      const groups = state.clef === 'mixed'
-        ? [{ clef: 'bass', count: bassCount }, { clef: 'treble', count: count - bassCount }]
-        : [{ clef: state.clef, count }];
-      state.sequence = groups.flatMap(group => {
-        const pool = [...getPool(group.clef)];
-        // 洗牌后取音，同一谱表内不重复。
-        for (let i = pool.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [pool[i], pool[j]] = [pool[j], pool[i]];
-        }
-        return pool.slice(0, group.count).map(next => ({ clef: group.clef, letter: next[0], octave: next[1], step: next[2], answer: solfege[next[0]], pitch: `${next[0]}${next[1]}` }));
+    function masteryKey(note) { return `${note.clef}:${note.pitch}`; }
+    function pick(pool, clef) {
+      const weights = pool.map(row => {
+        const m = mastery[`${clef}:${row[0]}${row[1]}`];
+        return state.exercise === 'review' && m ? 1 + 5 * (1 - m.correct / m.seen) + Math.min(3, m.totalMs / m.seen / 2500) : 1;
       });
-      state.position = 0;
-      state.current = state.sequence[0];
-      state.revealed = false;
-      drawStaff(state.sequence);
-      renderPiano();
-      updateCaption();
-      document.getElementById('clefHelp').textContent = state.clef === 'mixed'
-        ? `先练 ${bassCount} 个低音，再练 ${count - bassCount} 个高音；键盘随当前音符自动切换。`
-        : `始终显示高低音双谱表，当前练习${state.clef === 'treble' ? '高音' : '低音'}。`;
-      setFeedback('ready', '✦', state.clef === 'mixed'
-        ? `先低后高：${bassCount} 个低音 → ${count - bassCount} 个高音，从左到右跟随蓝圈作答。`
-        : `准备好了吗？先观察 ${count} 个音符的位置，从左到右识别。`);
+      let target = Math.random() * weights.reduce((a,b) => a+b,0);
+      return pool[weights.findIndex(w => (target -= w) < 0)] || pool[pool.length-1];
     }
-
-    function updateCaption() {
-      staffCaption.textContent = `高低音双谱表 · 当前${clefs[currentNote().clef].name} · 第 ${state.position + 1} / ${state.sequence.length} 个音 · ${state.mode === 'piano' ? '点击琴键' : '选择 1–7'}`;
+    function randomSequence() {
+      const count = state.sequenceLength;
+      const groups = state.clef === 'mixed' ? [{clef:'bass',count:Math.ceil(count/2)}, {clef:'treble',count:Math.floor(count/2)}] : [{clef:state.clef,count}];
+      return groups.flatMap(group => {
+        const pool = getPool(group.clef);
+        let previous = Math.floor(Math.random() * pool.length);
+        return Array.from({length:group.count}, (_,i) => {
+          let row;
+          if (state.exercise === 'patterns') {
+            // 相邻、重复及隔音构成短旋律，避免只认完全随机的孤立位置。
+            if (i) previous = Math.max(0,Math.min(pool.length-1,previous + [-2,-1,0,1,2][Math.floor(Math.random()*5)]));
+            row = pool[previous];
+          } else row = pick(pool, group.clef);
+          return makeNote(row[0]+row[1],group.clef);
+        });
+      });
     }
-
-    function currentNote() {
-      return state.sequence[state.position];
+    function setFeedback(type, mark, message) {
+      $('feedback').className = `feedback ${type}`;
+      $('feedbackMark').textContent = mark;
+      $('feedbackText').textContent = message;
     }
-
-    function setFeedback(type, mark, text) {
-      feedback.className = `feedback ${type}`;
-      feedback.innerHTML = `<span class="mark">${mark}</span><span>${text}</span>`;
+    function stopTransport() {
+      runSerial++;
+      clearTimeout(nextTimer); nextTimer = null;
+      cancelAnimationFrame(frame); frame = null;
+      scheduledVoices.forEach(voice => { try { voice.stop(); } catch (_) {} });
+      scheduledVoices = [];
+      state.running = null;
+      $('beatPulse').textContent='♩'; $('beatPulse').classList.remove('pulse-on');
+      $('startRhythm').classList.toggle('hidden', state.pacing!=='rhythm');
+      $('demo').disabled = false; $('startRhythm').textContent = T.start;
     }
-
-    function answerSolfege(value) {
-      if (state.revealed) chooseQuestion();
-      const answerValue = String(value);
-      const note = currentNote();
-      const isCorrect = answerValue === note.answer;
-      handleNoteAnswer(isCorrect, `${note.letter}${note.octave}（${note.answer}）`);
+    function chooseQuestion() {
+      stopTransport();
+      state.sequence = state.exercise === 'songs' ? SONGS[state.song].map(([pitch,beats]) => makeNote(pitch,'treble',beats)) : randomSequence();
+      state.position = 0; state.finished = false; state.noteStarted = performance.now();
+      document.body.classList.toggle('song-mode',state.exercise==='songs');
+      $('newQuestion').textContent = state.exercise === 'songs' ? T.replay : T.next;
+      $('songOptions').classList.toggle('hidden', state.exercise !== 'songs');
+      $('randomOptions').classList.toggle('hidden', state.exercise === 'songs');
+      $('rhythmControls').classList.toggle('hidden', state.exercise !== 'songs');
+      $('clefHelp').textContent = state.clef === 'mixed' ? T.mixedHelp : T.singleHelp;
+      drawStaff(); renderPiano(); renderMastery();
+      setFeedback('ready','✦', state.exercise === 'songs' ? (state.pacing === 'rhythm' ? T.waitStart : T.songReady(state.sequence.length)) : T.ready(state.sequence.length));
     }
-
-    function noteToMidi(letter, octave) {
-      return ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[letter]) + (octave + 1) * 12;
+    function visibleWindow() {
+      const width = Math.max(280, $('staffWrap').clientWidth - 20);
+      const capacity = Math.max(3, Math.min(16, Math.floor((width-105)/46)));
+      const start = Math.floor(state.position / capacity) * capacity;
+      return { width, capacity, start, end:Math.min(state.sequence.length,start+capacity) };
     }
-
-    function pitchToMidi(pitch) {
-      const letter = pitch.slice(0, 1);
-      const accidental = pitch.includes('♯') ? 1 : 0;
-      const octave = Number(pitch.match(/\d+$/)[0]);
-      return noteToMidi(letter, octave) + accidental;
+    function drawStaff() {
+      const {width,capacity,start,end} = visibleWindow();
+      const dual = state.exercise !== 'songs';
+      const compact=landscape.matches;
+      const height = dual ? (compact?208:316) : (compact?90:192);
+      const bottoms = compact ? {treble:dual?74:52,bass:172} : {treble:112,bass:258};
+      const left = 60, right = width - 13, gap = compact?(dual?10:8):14, stepUnit = gap/2;
+      const radius=compact?7.5:10, stemLength=compact?28:39;
+      svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
+      const activeClefs = dual ? ['treble','bass'] : ['treble'];
+      const staff = activeClefs.map(clef => {
+        const bottom = bottoms[clef];
+        const lines = Array.from({length:5},(_,i) => `<line x1="${left}" y1="${bottom-i*gap}" x2="${right}" y2="${bottom-i*gap}" class="staff-line"/>`).join('');
+        return `${lines}<text x="42" y="${clef==='treble' ? bottom+(compact?5:8) : bottom-(compact?5:8)}" font-size="${compact?48:67}" text-anchor="middle" font-family="Times New Roman, serif" fill="var(--note-ink)">${clef==='treble'?'𝄞':'𝄢'}</text>`;
+      }).join('');
+      const count = end-start;
+      const available = right-left-35;
+      let beat = state.sequence.slice(0,start).reduce((sum,n) => sum+n.beats,0);
+      const markup = state.sequence.slice(start,end).map((note,offset) => {
+        const index = start+offset;
+        const x = left + 28 + (offset+.5)*available/count;
+        const bottom = bottoms[note.clef], y = bottom-note.step*stepUnit;
+        const up = note.step < 4, stemX = x+(up?radius-1:1-radius), stemEnd=y+(up?-stemLength:stemLength);
+        const color = note.status==='correct' ? 'var(--correct-ink)' : note.status==='missed' || note.status==='wrong' ? 'var(--wrong-ink)' : 'var(--note-ink)';
+        let ledger='';
+        for(let s=-2;s>=note.step;s-=2) ledger+=`<line x1="${x-15}" y1="${bottom-s*stepUnit}" x2="${x+15}" y2="${bottom-s*stepUnit}" class="staff-line"/>`;
+        for(let s=10;s<=note.step;s+=2) ledger+=`<line x1="${x-15}" y1="${bottom-s*stepUnit}" x2="${x+15}" y2="${bottom-s*stepUnit}" class="staff-line"/>`;
+        const active = state.highlight && index===state.position && !state.finished ? `<circle cx="${x}" cy="${y}" r="${compact?14:19}" fill="var(--blue-soft)" stroke="var(--selection)"/>` : '';
+        const bar = state.exercise==='songs' && beat%4===0 ? `<line x1="${x-21}" y1="${bottom-4*gap}" x2="${x-21}" y2="${bottom}" class="staff-line"/><text x="${x-16}" y="${bottom-4*gap-12}" class="measure-label">${Math.floor(beat/4)+1}</text>` : '';
+        beat+=note.beats;
+        const half = note.beats===2, dot = note.beats===1.5;
+        return `<g data-note-index="${index}">${bar}${active}${ledger}<ellipse cx="${x}" cy="${y}" rx="${radius}" ry="${radius*.66}" transform="rotate(-18 ${x} ${y})" fill="${half?'var(--staff-paper)':color}" stroke="${color}" stroke-width="${half?2.5:1}"/><line x1="${stemX}" y1="${y}" x2="${stemX}" y2="${stemEnd}" stroke="${color}" stroke-width="2"/>${note.beats===.5?`<path d="M ${stemX} ${stemEnd} q 17 ${up?9:-9} 5 ${up?23:-23}" fill="none" stroke="${color}" stroke-width="3"/>`:''}${dot?`<circle cx="${x+16}" cy="${y-3}" r="2.3" fill="${color}"/>`:''}<text x="${x}" y="${bottom+(compact?(dual?31:25):42)}" class="note-duration">${state.exercise==='songs'?note.beats+' 拍':index+1}</text></g>`;
+      }).join('');
+      svg.innerHTML = `<style>.staff-line{stroke:var(--staff-line);stroke-width:1.3}.measure-label,.note-duration{fill:var(--muted);font:11px system-ui;text-anchor:middle}</style><rect width="${width}" height="${height}" fill="var(--staff-paper)"/>${staff}${markup}${state.exercise==='songs'?`<text x="65" y="${compact?(dual?20:10):48}" fill="var(--muted)" font-size="12">4/4 · C</text>`:''}`;
+      $('staffCaption').textContent = T.caption(clefNames[currentNote().clef],state.position+1,state.sequence.length,Math.floor(start/capacity)+1,Math.ceil(state.sequence.length/capacity));
+      $('phraseProgress').textContent = `${state.finished ? state.sequence.length : state.position} / ${state.sequence.length}`;
+      $('phraseFill').style.width = `${(state.finished?1:state.position/state.sequence.length)*100}%`;
     }
-
-    function playTone(pitch) {
-      if (!state.soundEnabled) return;
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!audioContext) audioContext = new AudioContextClass();
-        audioContext.resume();
-        const now = audioContext.currentTime;
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        oscillator.type = 'triangle';
-        oscillator.frequency.value = 440 * Math.pow(2, (pitchToMidi(pitch) - 69) / 12);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
-        oscillator.connect(gain).connect(audioContext.destination);
-        oscillator.start(now);
-        oscillator.stop(now + 0.8);
-      } catch (error) {
-        // 某些浏览器可能禁用音频上下文，点击练习仍应正常计分。
-      }
-    }
-
-    function answerPiano(pitch, isBlack) {
-      playTone(pitch);
-      if (isBlack) {
-        setFeedback('ready', '♩', '当前练习是自然音，黑键不计分；请找相邻的白键。');
-        return;
-      }
-      if (state.revealed) chooseQuestion();
-      const note = currentNote();
-      const targetMidi = noteToMidi(note.letter, note.octave);
-      const selectedMidi = pitchToMidi(pitch);
-      const isCorrect = selectedMidi === targetMidi;
-      const label = `${note.letter}${note.octave}（${note.answer}）`;
-      const wrongText = pitch[0] === note.letter ? `唱名对了，但八度不对：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。` : `再看一眼：第 ${state.position + 1} 个音是 ${label}，你按的是 ${pitch}。`;
-      handleNoteAnswer(isCorrect, label, wrongText);
-    }
-
-    function handleNoteAnswer(isCorrect, label, wrongText) {
-      const total = state.sequence.length;
-      const currentIndex = state.position;
+    function recordFirst(note, correct) {
+      if (note.firstAttempted) return;
+      note.firstAttempted=true;note.firstCorrect=correct;
       state.answered++;
-      if (isCorrect) { state.correct++; state.streak++; state.best = Math.max(state.best, state.streak); }
-      else state.streak = 0;
+      if(correct) {state.correct++;state.streak++;state.best=Math.max(state.best,state.streak);} else state.streak=0;
+      const onsetTime = state.running==='rhythm' ? state.transportStart+state.onsets[state.position]*state.beatMs : state.noteStarted;
+      const elapsed = Math.max(0,Math.min(30000,performance.now()-onsetTime));
+      const key=masteryKey(note), m=mastery[key] || {seen:0,correct:0,totalMs:0};
+      m.seen++; m.correct+=Number(correct); m.totalMs+=elapsed; mastery[key]=m;
+      try {localStorage.setItem('staff-mastery-v2',JSON.stringify(mastery));} catch(_) {}
       updateStats();
-      if (!isCorrect) {
-        setFeedback('wrong', '×', wrongText || `第 ${currentIndex + 1} / ${total} 个音是 ${label}，再试一次。`);
+    }
+    function renderMastery() {
+      const rows=Object.entries(mastery).sort((a,b) => (a[1].correct/a[1].seen)-(b[1].correct/b[1].seen) || b[1].totalMs/b[1].seen-a[1].totalMs/a[1].seen).slice(0,4);
+      $('weakNotes').textContent='';
+      if (!rows.length) {$('weakNotes').textContent=T.weakEmpty; return;}
+      rows.forEach(([key,m]) => {const line=document.createElement('p');line.textContent=T.weakRow(`${clefNames[key.split(':')[0]]} ${key.split(':')[1]}`,Math.round(m.correct/m.seen*100),(m.totalMs/m.seen/1000).toFixed(1));$('weakNotes').appendChild(line);});
+    }
+    function updateStats() {
+      $('streak').textContent=state.streak; $('best').textContent=state.best; $('answered').textContent=state.answered;
+      $('accuracy').textContent=state.answered?`${Math.round(state.correct/state.answered*100)}%`:'—';
+      $('progressBar').style.width=`${Math.min(100,state.answered/20*100)}%`;
+      $('progressText').textContent=`${Math.min(state.answered,20)} / 20`;
+    }
+    function advance() {
+      if(state.position===state.sequence.length-1) {
+        state.finished=true; drawStaff(); renderMastery();
+        if(state.exercise==='songs') setFeedback('correct','✓',T.songDone);
+        else {setFeedback('correct','✓',T.done);nextTimer=setTimeout(chooseQuestion,800);}
         return;
       }
-      if (currentIndex < total - 1) {
-        state.position++;
-        state.current = state.sequence[state.position];
-        drawStaff(state.sequence);
-        const switchedClef = state.sequence[currentIndex].clef !== currentNote().clef;
-        if (switchedClef) renderPiano();
-        updateCaption();
-        setFeedback('correct', '✓', switchedClef
-          ? `低音部分完成！已切换到高音键盘，继续识别第 ${state.position + 1} / ${total} 个音。`
-          : `答对了！继续识别第 ${state.position + 1} / ${total} 个音。`);
-        return;
+      const oldClef=currentNote().clef;
+      state.position++;state.noteStarted=performance.now();drawStaff();
+      if(oldClef!==currentNote().clef) renderPiano();
+    }
+    function answer(value,isPiano=true,isBlack=false) {
+      if(isPiano) playTone(value);
+      else {
+        const note=currentNote();
+        const letter=Object.keys(solfege).find(k=>solfege[k]===String(value));
+        playTone(letter+note.octave);
       }
-      state.revealed = true;
-      setFeedback('correct', '✓', `整组答对！${total} 个音全部识别完成，马上进入下一题。`);
-      scheduleNextQuestion(true);
+      if(state.finished || state.running==='demo' || state.running==='countdown') return;
+      if(state.exercise==='songs' && state.pacing==='rhythm' && state.running!=='rhythm') {setFeedback('ready','♩',T.waitStart);return;}
+      if(isBlack) {setFeedback('ready','♩',T.black);return;}
+      if(state.running==='rhythm') {
+        const expected=state.onsets[state.position];
+        const delta=(performance.now()-state.transportStart)/state.beatMs-expected;
+        if(delta < -.3) {setFeedback('ready','♩',T.early);return;}
+      }
+      const note=currentNote();
+      const correct=isPiano ? value===note.pitch : String(value)===note.answer;
+      recordFirst(note,correct);
+      if(!correct) {
+        const label=`${note.pitch}（${note.answer}）`;
+        setFeedback('wrong','×',isPiano && value[0]===note.letter ? T.octave(label,value) : T.wrong(state.position+1,label));return;
+      }
+      note.status='correct';
+      if(state.running==='rhythm') {
+        note.resolved=true;
+        setFeedback('correct','✓',T.continue(Math.min(state.position+2,state.sequence.length),state.sequence.length));
+        // 下一音按自己的时值起拍，避免长音被快速连点跳过。
+        if(state.position<state.sequence.length-1) {state.position++;state.noteStarted=performance.now();drawStaff();}
+        else {drawStaff();setFeedback('correct','✓',T.songDone);}
+      } else {advance();if(!state.finished)setFeedback('correct','✓',T.continue(state.position+1,state.sequence.length));}
     }
-
-    function scheduleNextQuestion(isCorrect) {
-      if (!isCorrect) return;
-      window.setTimeout(() => {
-        if (state.revealed) chooseQuestion();
-      }, 800);
+    async function ensureAudio() {
+      try {
+        const Audio=window.AudioContext||window.webkitAudioContext;
+        if(!Audio) return false;
+        if(!audioContext)audioContext=new Audio();
+        if(audioContext.state!=='running')await audioContext.resume();
+        return audioContext.state==='running';
+      } catch(_) {return false;}
     }
-
-    function renderPiano() {
-      const activeClef = currentNote().clef;
-      const startOctave = activeClef === 'treble' ? 4 : 2;
-      const sequence = [];
-      const names = [
-        ['C', false], ['C♯', true], ['D', false], ['D♯', true], ['E', false], ['F', false], ['F♯', true],
-        ['G', false], ['G♯', true], ['A', false], ['A♯', true], ['B', false]
-      ];
-      for (let octave = startOctave; octave <= startOctave + 1; octave++) names.forEach(([name, black]) => sequence.push({ name, black, pitch: `${name}${octave}`, octave }));
-      piano.innerHTML = '';
-      const whiteCount = sequence.filter(item => !item.black).length;
-      let whiteBefore = 0;
-      sequence.forEach((item) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.dataset.pitch = item.pitch;
-        button.dataset.black = item.black ? '1' : '0';
-        button.setAttribute('aria-label', item.pitch);
-        button.textContent = item.black ? item.name : `${item.name}${item.octave}`;
-        if (item.black) {
-          button.className = 'piano-black';
-          button.style.left = `calc(${whiteBefore / whiteCount * 100}% - 2.58%)`;
+    function tone(midi,when,duration,volume=.13,type='triangle',tracked=false) {
+      const voice=audioContext.createOscillator(),gain=audioContext.createGain();
+      voice.type=type;voice.frequency.value=440*Math.pow(2,(midi-69)/12);
+      gain.gain.setValueAtTime(.0001,when);gain.gain.exponentialRampToValueAtTime(volume,when+.012);
+      gain.gain.exponentialRampToValueAtTime(.0001,when+Math.max(.04,duration));
+      voice.connect(gain);gain.connect(audioContext.destination);voice.start(when);voice.stop(when+duration+.03);
+      if(tracked)scheduledVoices.push(voice);
+      voice.onended=()=>{voice.disconnect();gain.disconnect();const i=scheduledVoices.indexOf(voice);if(i>=0)scheduledVoices.splice(i,1);};
+    }
+    async function playTone(pitch) {
+      if(!state.soundEnabled)return;
+      const duration=state.exercise==='songs'?currentNote().beats*60/Number($('tempo').value)*.85:.65;
+      if(await ensureAudio())tone(pitchToMidi(pitch),audioContext.currentTime,duration);
+    }
+    async function startTransport(demo) {
+      if(state.running){stopTransport();chooseQuestion();return;}
+      if(demo && !state.soundEnabled){setFeedback('ready','♩',T.silentDemo);return;}
+      chooseQuestion();
+      const serial=runSerial;
+      if(!await ensureAudio()){if(serial===runSerial)setFeedback('wrong','!',T.audioFailed);return;}
+      if(serial!==runSerial)return;
+      const bpm=Number($('tempo').value);state.beatMs=60000/bpm;
+      state.onsets=[];let total=0;state.sequence.forEach(n=>{state.onsets.push(total);total+=n.beats;});
+      state.totalBeats=total;
+      state.transportStart=performance.now()+4*state.beatMs;
+      const audioStart=audioContext.currentTime+4*60/bpm;
+      state.running='countdown';$('demo').disabled=true;$('startRhythm').textContent=T.stop;$('startRhythm').classList.remove('hidden');
+      // 提前调度音频保证拍点稳定；停止、换曲或换模式会取消全部已调度声音。
+      if(state.soundEnabled)for(let b=-4;b<total;b++)tone(b%4===0?90:83,audioStart+b*60/bpm,.035,.045,'sine',true);
+      if(demo)state.sequence.forEach((n,i)=>tone(pitchToMidi(n.pitch),audioStart+state.onsets[i]*60/bpm,n.beats*60/bpm*.85,.13,'triangle',true));
+      function tick() {
+        if(serial!==runSerial)return;
+        const beat=(performance.now()-state.transportStart)/state.beatMs;
+        if(beat<0) {setFeedback('ready','♩',T.countIn(Math.max(1,Math.min(4,Math.floor(beat+4)+1))));}
+        else if(beat>=total) {
+          if(!demo)state.sequence.forEach(n=>{if(!n.resolved){recordFirst(n,false);n.status='missed';}});
+          const right=state.sequence.filter(n=>n.firstCorrect).length;
+          const missed=state.sequence.filter(n=>n.status==='missed').length;
+          stopTransport();state.finished=true;drawStaff();renderMastery();
+          setFeedback('ready','♫',demo?T.songReady(state.sequence.length):T.summary(right,missed,state.sequence.length));return;
         } else {
-          button.className = 'piano-white';
-          whiteBefore++;
+          if(state.running==='countdown'&&!demo)setFeedback('ready','♩',T.rhythmNow(1));
+          state.running=demo?'demo':'rhythm';
+          const index=state.onsets.findIndex((onset,i)=>beat>=onset && beat<onset+state.sequence[i].beats);
+          $('beatPulse').textContent=String(Math.floor(beat)%4+1);
+          $('beatPulse').classList.toggle('pulse-on',beat%1<.2);
+          if(demo){if(state.position!==index){state.position=index;drawStaff();}setFeedback('ready','♫',T.demoPlaying);}
+          else {
+            // 超出当前起音容差即记为漏音，下一音继续按拍前进。
+            while(state.position<state.sequence.length && !currentNote().resolved && beat>state.onsets[state.position]+.45) {
+              const note=currentNote();recordFirst(note,false);note.status='missed';note.resolved=true;setFeedback('wrong','◌',T.missedNote(state.position+1));
+              if(state.position===state.sequence.length-1)break;
+              state.position++;state.noteStarted=performance.now();drawStaff();
+            }
+          }
         }
-        button.addEventListener('click', () => answerPiano(item.pitch, item.black));
+        frame=requestAnimationFrame(tick);
+      }
+      frame=requestAnimationFrame(tick);
+    }
+    function renderPiano() {
+      const width=$('keyboardScroll').clientWidth;
+      const activeClef=currentNote().clef;
+      let first=activeClef==='bass'?2:4, last=first+1;
+      if(state.exercise==='songs') {first=4;last=width>=14*46?5:4;}
+      else if(width>=21*46)last=first+2;
+      if(state.clef==='mixed' && state.exercise!=='songs' && width>=28*46){first=2;last=5;}
+      const whiteCount=(last-first+1)*7;
+      const keyWidth=Math.max(46,Math.min(70,width/whiteCount));
+      const oldScroll=$('keyboardScroll').scrollLeft;
+      piano.style.width=`${whiteCount*keyWidth}px`;piano.innerHTML='';
+      const names=[['C',false],['C♯',true],['D',false],['D♯',true],['E',false],['F',false],['F♯',true],['G',false],['G♯',true],['A',false],['A♯',true],['B',false]];
+      let whiteBefore=0;
+      for(let octave=first;octave<=last;octave++) names.forEach(([name,black])=>{
+        const pitch=name+octave,button=document.createElement('button');button.type='button';button.dataset.pitch=pitch;
+        button.setAttribute('aria-label',pitch);button.className=black?'piano-black':'piano-white';
+        const label=document.createElement('span');label.textContent=state.labels?pitch:(pitch==='C4'?'•':'');button.appendChild(label);
+        if(black){button.style.width=`${keyWidth*.65}px`;button.style.left=`${whiteBefore*keyWidth-keyWidth*.325}px`;}
+        else {button.style.width=`${keyWidth}px`;whiteBefore++;}
+        button.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();button.classList.add('pressed');answer(pitch,true,black);});
+        button.addEventListener('click',event=>{if(event.detail===0)answer(pitch,true,black);});
+        const release=()=>button.classList.remove('pressed');button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('pointerleave',release);
         piano.appendChild(button);
       });
-      pianoLabel.textContent = `${activeClef === 'treble' ? '高音' : '低音'}键盘 · C${startOctave}–B${startOctave + 1} · 点击琴键作答（黑键不计分）`;
+      $('keyboardScroll').scrollLeft=oldScroll;
+      $('pianoLabel').textContent=T.piano(`C${first}`,`B${last}`,whiteCount*keyWidth>width+1);
     }
-
-    function reveal() {
-      if (state.revealed) return;
-      const note = currentNote();
-      const label = `${note.letter}${note.octave}（${note.answer}）`;
-      setFeedback('wrong', '◌', `第 ${state.position + 1} / ${state.sequence.length} 个音答案是 ${label}。本题不计分，记住位置后点击“换一个”。`);
-      state.revealed = true;
+    function updatePacing() {
+      state.pacing=$('pacing').value;
+      $('startRhythm').classList.toggle('hidden',state.pacing!=='rhythm');chooseQuestion();
     }
-
-    function updateStats() {
-      document.getElementById('streak').textContent = state.streak;
-      document.getElementById('best').textContent = state.best;
-      document.getElementById('answered').textContent = state.answered;
-      document.getElementById('accuracy').textContent = state.answered ? `${Math.round(state.correct / state.answered * 100)}%` : '—';
-      const progress = Math.min(100, state.answered / 20 * 100);
-      document.getElementById('progressBar').style.width = `${progress}%`;
-      document.getElementById('progressText').textContent = `${Math.min(state.answered, 20)} / 20`;
+    function applyLayout() {
+      const compact=landscape.matches||document.body.classList.contains('focus-mode');
+      $('settingsDetails').open=!compact;
+      $('lessonDetails').open=!compact;
+      document.body.classList.toggle('landscape',landscape.matches);
+      if(state.sequence.length){drawStaff();renderPiano();}
     }
-
-    function updateTimer() {
-      const seconds = Math.floor((Date.now() - state.startedAt) / 1000);
-      const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const ss = String(seconds % 60).padStart(2, '0');
-      document.getElementById('timer').textContent = `${mm}:${ss}`;
-    }
-
-    document.querySelectorAll('.key-btn').forEach(button => button.addEventListener('click', () => answerSolfege(button.dataset.answer)));
-    document.addEventListener('keydown', event => { if (state.mode === 'solfege' && /^[1-7]$/.test(event.key)) answerSolfege(event.key); });
-    document.getElementById('showAnswer').addEventListener('click', reveal);
-    document.getElementById('newQuestion').addEventListener('click', chooseQuestion);
-    document.getElementById('soundToggle').addEventListener('click', () => {
-      state.soundEnabled = !state.soundEnabled;
-      const button = document.getElementById('soundToggle');
-      button.textContent = state.soundEnabled ? '🔊 音效 开' : '🔇 音效 关';
-      button.classList.toggle('off', !state.soundEnabled);
-    });
-    document.querySelectorAll('#inputMode button').forEach(button => button.addEventListener('click', () => {
-      document.querySelectorAll('#inputMode button').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-      state.mode = button.dataset.mode;
-      document.getElementById('piano').classList.toggle('hidden', state.mode !== 'piano');
-      document.getElementById('pianoLabel').classList.toggle('hidden', state.mode !== 'piano');
-      document.getElementById('solfegeKeys').classList.toggle('hidden', state.mode !== 'solfege');
-      updateCaption();
+    $('exercise').addEventListener('change',()=>{state.exercise=$('exercise').value;chooseQuestion();});
+    $('song').addEventListener('change',()=>{state.song=$('song').value;chooseQuestion();});
+    $('pacing').addEventListener('change',updatePacing);
+    $('tempo').addEventListener('input',()=>{$('tempoValue').textContent=$('tempo').value;});
+    $('tempo').addEventListener('change',()=>{if(state.running)chooseQuestion();});
+    $('demo').addEventListener('click',()=>startTransport(true));
+    $('startRhythm').addEventListener('click',()=>startTransport(false));
+    $('newQuestion').addEventListener('click',chooseQuestion);
+    $('soundToggle').addEventListener('click',()=>{state.soundEnabled=!state.soundEnabled;$('soundToggle').textContent=state.soundEnabled?T.soundOn:T.soundOff;$('soundToggle').setAttribute('aria-pressed',String(state.soundEnabled));if(!state.soundEnabled&&state.running)chooseQuestion();});
+    $('labelsToggle').addEventListener('change',()=>{state.labels=$('labelsToggle').checked;renderPiano();});
+    $('highlightToggle').addEventListener('change',()=>{state.highlight=$('highlightToggle').checked;drawStaff();});
+    $('focusToggle').addEventListener('click',()=>{document.body.classList.toggle('focus-mode');$('focusToggle').textContent=document.body.classList.contains('focus-mode')?T.exitFocus:T.focus;applyLayout();});
+    $('showAnswer').addEventListener('click',()=>{if(state.finished||state.running)return;recordFirst(currentNote(),false);setFeedback('ready','◌',T.hint(currentNote().pitch+'（'+currentNote().answer+'）'));});
+    document.querySelectorAll('.key-btn').forEach(button=>button.addEventListener('click',()=>answer(button.dataset.answer,false)));
+    document.addEventListener('keydown',event=>{if(event.repeat||/INPUT|SELECT|TEXTAREA/.test(event.target.tagName))return;if(state.mode==='solfege'&&/^[1-7]$/.test(event.key))answer(event.key,false);});
+    document.querySelectorAll('#inputMode button').forEach(button=>button.addEventListener('click',()=>{
+      state.mode=button.dataset.mode;document.querySelectorAll('#inputMode button').forEach(item=>item.classList.toggle('active',item===button));
+      $('keyboardScroll').classList.toggle('hidden',state.mode!=='piano');$('pianoLabel').classList.toggle('hidden',state.mode!=='piano');$('solfegeKeys').classList.toggle('hidden',state.mode!=='solfege');if(state.mode==='piano')renderPiano();
     }));
-    document.querySelectorAll('#clefSelector button').forEach(button => button.addEventListener('click', () => {
-      document.querySelectorAll('#clefSelector button').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-      state.clef = button.dataset.clef;
-      const singleNoteButton = document.querySelector('#lengthSelector [data-length="1"]');
-      singleNoteButton.disabled = state.clef === 'mixed';
-      if (state.clef === 'mixed' && state.sequenceLength === 1) state.sequenceLength = 6;
-      document.querySelectorAll('#lengthSelector button').forEach(item => item.classList.toggle('active', Number(item.dataset.length) === state.sequenceLength));
-      chooseQuestion();
+    document.querySelectorAll('#clefSelector button').forEach(button=>button.addEventListener('click',()=>{
+      state.clef=button.dataset.clef;document.querySelectorAll('#clefSelector button').forEach(item=>item.classList.toggle('active',item===button));
+      if(state.clef==='mixed'&&state.sequenceLength===1){state.sequenceLength=2;$('length').value='2';}chooseQuestion();
     }));
-    document.querySelectorAll('#lengthSelector button').forEach(button => button.addEventListener('click', () => {
-      document.querySelectorAll('#lengthSelector button').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-      state.sequenceLength = Number(button.dataset.length);
-      chooseQuestion();
-    }));
-    document.querySelectorAll('input[name="range"]').forEach(input => input.addEventListener('change', () => { state.range = input.value; chooseQuestion(); }));
-
-    chooseQuestion();
-    updateStats();
-    setInterval(updateTimer, 1000);
+    $('length').addEventListener('change',()=>{state.sequenceLength=Number($('length').value);if(state.clef==='mixed'&&state.sequenceLength===1){state.sequenceLength=2;$('length').value='2';}chooseQuestion();});
+    document.querySelectorAll('input[name="range"]').forEach(input=>input.addEventListener('change',()=>{state.range=input.value;chooseQuestion();}));
+    let resizeFrame;
+    new ResizeObserver(()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{if(state.sequence.length){drawStaff();if(state.mode==='piano')renderPiano();}});}).observe($('staffWrap'));
+    landscape.addEventListener('change',applyLayout);
+    document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.running)chooseQuestion();});
+    chooseQuestion();updateStats();applyLayout();
+    setInterval(()=>{const s=Math.floor((Date.now()-state.startedAt)/1000);$('timer').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;},1000);
   </script>
 </body>
 </html>
